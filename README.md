@@ -6,7 +6,7 @@ This is a Python-based tool for simulating, storing, analyzing, and displaying v
 - Simulated CAN/J1939 messages
 - SQLite data storage
 - Data trend analysis with Pandas
-- Data displayed using Matplotlib
+- Data displayed using Matplotlib and Streamlit
 
 
 # How to Run the Project:
