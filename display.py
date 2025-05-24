@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt # Importing matplotlib for plotting
 from analyze import fetch_rpm_data # Importing fetch_rpm_data function from analyze.py
 
-# This function fetches RPM data from the SQLite database and plots it
+# Function to plot RPM data
 def plot_rpm():
     df = fetch_rpm_data('db/telemetry.db')
     plt.plot(df['timestamp'], df['rpm'])
@@ -13,6 +13,5 @@ def plot_rpm():
     plt.savefig("display/rpm_plot.png")
     plt.show()
 
-# Call the function to plot RPM data
 if __name__ == "__main__":
     plot_rpm()

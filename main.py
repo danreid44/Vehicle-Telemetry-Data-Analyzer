@@ -24,6 +24,5 @@ def load_to_db(csv_file, db_file):
     conn.commit()
     conn.close() # Commit changes and close connection
 
-# Call the function to load data
 if __name__ == "__main__":
     load_to_db('data/telemetry.csv', 'db/telemetry.db') 

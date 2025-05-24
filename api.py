@@ -96,6 +96,5 @@ def delete_telemetry(record_id):
     return jsonify({"message": f"Telemetry record {record_id} deleted"}), 200
 
 
-# Route to get telemetry data
 if __name__ == "__main__":
     app.run(debug=True)

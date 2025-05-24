@@ -11,7 +11,7 @@ def fetch_rpm_data(db_file):
     df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x0CF00400'", conn) # Fetch data from telemetry table
     conn.close() # Close connection
 
-    df['timestamp'] = pd.to_datetime(df['timestamp']) # Convert timestamp to datetime
+    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, format='mixed') # Convert timestamp to datetime
     df['rpm'] = df['data'].apply(hex_to_rpm) # Convert hex data to RPM
 
     return df # Return DataFrame with timestamp and RPM data
@@ -26,6 +26,6 @@ def fetch_pto_events(db_file):
     df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x18FEF100'", conn) # Fetch PTO data
     conn.close()
 
-    df['timestamp'] = pd.to_datetime(df['timestamp']) # Convert timestamp to datetime
+    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, format='mixed') # Convert timestamp to datetime
     df['pto_on'] = df['data'].apply(is_pto_on) # Convert hex data to PTO status
     return df
