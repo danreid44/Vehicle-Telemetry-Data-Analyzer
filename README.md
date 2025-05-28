@@ -48,4 +48,4 @@ python api.py # Launch API routes and Flask app on http://127.0.0.1:5000
 | GET           | '/api/pto'           | Get PTO telemetry data  |
 | POST          | '/api/telemetry'     | Add new telemetry data  |
 | PATCH         | '/api/telemetry/:id' | Patch telemetry data    |
-| DELTE         | '/api/telemetry/:id' | Delete telemetry data   |
+| DELETE        | '/api/telemetry/:id' | Delete telemetry data   |

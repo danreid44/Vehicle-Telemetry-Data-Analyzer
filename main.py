@@ -1,4 +1,4 @@
-import sqlite3 # Import SQLite library
+import sqlite3
 import csv
 
 # Function to load telemetry data from CSV to SQLite database

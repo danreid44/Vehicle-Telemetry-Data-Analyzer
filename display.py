@@ -1,9 +1,9 @@
-import matplotlib.pyplot as plt # Importing matplotlib for plotting
-from analyze import fetch_rpm_data # Importing fetch_rpm_data function from analyze.py
+import matplotlib.pyplot as plt
+from analyze import get_rpm_data # Import function from analyze.py
 
 # Function to plot RPM data
 def plot_rpm():
-    df = fetch_rpm_data('db/telemetry.db')
+    df = get_rpm_data('db/telemetry.db')
     plt.plot(df['timestamp'], df['rpm'])
     plt.xlabel('Timestamp')
     plt.ylabel('RPM')
