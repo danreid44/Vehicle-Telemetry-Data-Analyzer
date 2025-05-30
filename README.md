@@ -1,6 +1,6 @@
 # Vehicle Telemetry Data Analyzer
 
-This is a Python-based tool for simulating, storing, analyzing, and displaying vehicle telemetry data such as engine RPM, PTO activity, and fault codes. This is designed to replicate the primary functions of commerical fleet diagnostics platforms commonly used in the industry. A postman collection is provided to perform CRUD operations on the SQLite database.
+This project is a Python-based tool for simulating and analyzing vehicle telemetry data, including engine RPM, PTO activity, and fault codes. It generates CAN Bus messages in hexadecimal format according to the SAE J1939 standard and stores them in a SQLite database. The raw hex data is then decoded into human-readable values and visualized on an interactive Streamlit dashboard. The project replicates key functions of commercial fleet diagnostics platforms, using realistic data patterns and message structures. A Postman collection is also provided to perform full CRUD operations on the database, enabling further customization and future extensions of the project.
 
 ## Key Features ##
 - Simulated CAN/J1939 messages
