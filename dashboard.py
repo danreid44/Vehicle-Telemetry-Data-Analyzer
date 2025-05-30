@@ -5,7 +5,8 @@ from analyze import (
     get_rpm_data,
     get_rpm_stats,
     get_pto_data,
-    get_pto_stats
+    get_pto_stats,
+    get_fault_data
 ) # Importing functions from analyze.py
 
 # Load data
@@ -14,6 +15,8 @@ df_rpm = get_rpm_data(DB_PATH)
 df_pto = get_pto_data(DB_PATH)
 rpm_stats = get_rpm_stats(DB_PATH)
 pto_stats = get_pto_stats(DB_PATH)
+df_fault = get_fault_data(DB_PATH)
+
 
 # Streamlit page settings
 st.set_page_config(
@@ -24,13 +27,13 @@ st.title("Vehicle Telemetry Dashboard")
 st.markdown("Analyze simulated J1939 vehicle data: engine RPM, PTO activation, and more.")
 
 # Tabbed layout
-tab0, tab1, tab2 = st.tabs(["Dashboard Summary","Engine RPM", "PTO Activation"])
+tab0, tab1, tab2, tab3 = st.tabs(["Dashboard Summary","Engine RPM", "PTO Activation", "Fault Codes"])
 
 # Dashboard Summary Tab
 with tab0:
-    st.subheader("Summary Statistics")
+    st.subheader("Dashboard Summary")
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
 
     with col1:
         st.markdown("RPM Statistics")
@@ -42,6 +45,13 @@ with tab0:
         st.markdown("PTO Activity")
         st.metric("Total PTO Duration", f"{pto_stats['pto_duration_min']} min")
         st.metric("PTO Activation Count", f"{pto_stats['pto_usage_count']} times")
+
+    with col3:
+        st.markdown("Fault Codes")
+        if df_fault.empty:
+            st.success("No fault codes detected.")
+        else:
+            st.metric("Total Faults", f"{len(df_fault)}")
 
     st.markdown("---")
     st.caption("This summary shows key metrics from the latest simulated data in the telemetry database.")
@@ -75,6 +85,17 @@ with tab2:
     with st.expander("Show Raw PTO Data"):
         st.dataframe(df_pto)
 
+with tab3:
+    st.subheader("Fault Codes Overview")
+    st.markdown("This section shows any fault codes detected in the telemetry data.")
+    
+    if df_fault.empty:
+        st.success("No fault codes detected in the current dataset.")
+    else:
+        st.dataframe(df_fault)
+        st.markdown(f"Total Faults: {len(df_fault)}")
+        st.markdown("Fault codes are represented by SPN (Suspect Parameter Number) and FMI (Failure Mode Identifier).")
+        
 # Footer
 st.markdown("---")
 st.caption("Developed by Dan Reid • Simulated CAN/J1939 Data • Powered by Streamlit")

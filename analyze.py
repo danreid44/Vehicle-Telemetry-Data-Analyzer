@@ -52,3 +52,23 @@ def get_pto_stats(db_file):
         "pto_duration_sec": int(engaged_duration_sec),
         "pto_duration_min": round(engaged_duration_sec / 60, 2)
     }
+
+
+# Function to get fault codes from SQLite database
+def get_fault_data(db_file):
+    def decode_fault(hex_str):
+        try:
+            spn = int(hex_str[:4], 16)
+            fmi = int(hex_str[4:6], 16)
+            return spn, fmi
+        except:
+            return None, None
+
+    conn = sqlite3.connect(db_file)
+    df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x0CFE6CEE'", conn)
+    conn.close()
+
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    df[['spn', 'fmi']] = df['data'].apply(lambda d: pd.Series(decode_fault(d)))
+    df.dropna(inplace=True)
+    return df

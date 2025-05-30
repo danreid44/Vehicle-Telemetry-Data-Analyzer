@@ -39,9 +39,31 @@ class PTOStateMachine:
         prefix = "01" if self.pto_on else "00" # PTO engaged state format
         return prefix + ''.join(random.choices('0123456789ABCDEF', k=6)), self.pto_on # Pad to 8 characters
 
-# Simulate random 8-character hex string
-def simulate_generic_hex():
-    return ''.join(random.choices('0123456789ABCDEF', k=8))
+# Simulate a generic fault code in hex format
+class FaultGenerator:
+    def simulate_fault_hex(self):
+        spn = random.randint(100, 9999)  # SPN (Suspect Parameter Number)
+        fmi = random.randint(0, 31)      # FMI (Failure Mode Identifier)
+        return f"{spn:04X}{fmi:02X}00"   # SPN(4 hex) + FMI(2 hex) + pad to 8 characters
+    
+    def __init__(self):
+        self.active = False
+        self.timer = random.randint(300, 2400)  # Initial fault timer (5-40 minutes)
+
+    def maybe_emit_fault(self):
+        if self.timer <= 0:
+            if not self.active:
+                self.active = True
+                self.timer = random.randint(5, 30)  # Emit fault for 5-30 seconds
+            else:
+                self.active = False
+                self.timer = random.randint(600, 1800)  # Reset timer for next fault in 10-30 minutes
+        else:
+            self.timer -= 1
+
+        if self.active:
+            return self.simulate_fault_hex()
+        return None
 
 # Generate 3600 rows of telemetry data, equivalent to 1 hour
 def generate_data(file="data/telemetry.csv", rows=3600):
@@ -49,6 +71,7 @@ def generate_data(file="data/telemetry.csv", rows=3600):
     timestamp = datetime.now(timezone.utc) # Start from current UTC time with explicit timezone awareness
     pto_state = PTOStateMachine()
     rpm_gen = RPMGenerator()
+    fault_gen = FaultGenerator()
 
     with open(file, 'w', newline='') as f:
         writer = csv.writer(f) # Open file in write mode
@@ -67,8 +90,9 @@ def generate_data(file="data/telemetry.csv", rows=3600):
             writer.writerow([ts, '0x0CF00400', rpm_data])
 
             # Simulate generic error/fault code data
-            generic_data = simulate_generic_hex()
-            writer.writerow([ts, '0x0CFE6CEE', generic_data])
+            fault_data = fault_gen.maybe_emit_fault()
+            if fault_data:
+                writer.writerow([ts, '0x0CFE6CEE', fault_data])
 
             timestamp += timedelta(seconds=1) # Increment timestamp by 1 second
 
