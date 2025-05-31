@@ -1,6 +1,6 @@
 # Vehicle Telemetry Data Analyzer
 
-This project is a Python-based tool for simulating and analyzing vehicle telemetry data, including engine RPM, PTO activity, and fault codes. It generates CAN Bus messages in hexadecimal format according to the SAE J1939 standard and stores them in a SQLite database. The raw hex data is then decoded into human-readable values and visualized on an interactive Streamlit dashboard. The project replicates key functions of commercial fleet diagnostics platforms, using realistic data patterns and message structures. A Postman collection is also provided to perform full CRUD operations on the database, enabling further customization and future extensions of the project.
+This project is a Python-based tool for simulating and analyzing vehicle telemetry data, including engine RPM, PTO activity, and fault codes. It generates CAN Bus messages in hexadecimal format according to the SAE J1939 standard and stores them in a SQLite database. The raw hex data is then decoded into human-readable values and displayed on an interactive Streamlit dashboard. The project replicates key functions of commercial fleet diagnostics platforms, using realistic data patterns and message structures. A Postman collection is also provided to perform full CRUD operations on the database, enabling further customization and future extensions of the project.
 
 ## Key Features ##
 - Simulated CAN/J1939 messages
@@ -9,6 +9,49 @@ This project is a Python-based tool for simulating and analyzing vehicle telemet
 - Data displayed using Streamlit and Matplotlib
 - Backend API routes to perform CRUD operations
 
+## Screenshots ##
+
+*Dashboard display of engine RPM over time as well as RPM stats.*
+
+<img src="screenshots/Dashboard_RPM.png" alt="Vehicle Telemetry Dashboard RPM Screenshot" width="700"/>
+
+<br>
+<br>
+
+*Dashboard display of PTO activations and stats.*
+
+<img src="screenshots/Dashboard_PTO.png" alt="Vehicle Telemetry Dashboard PTO Screenshot" width="700"/>
+
+<br>
+<br>
+
+*Dashboard display of fault codes and stats.*
+
+<img src="screenshots/Dashboard_Faults.png" alt="Vehicle Telemetry Dashboard Faults Screenshot" width="700"/>
+
+<br>
+<br>
+
+*Dashboard summary of all key metrics of the simulated data.*
+
+<img src="screenshots/Dashboard_Summary.png" alt="Vehicle Telemetry Dashboard Summary Screenshot" width="700"/>
+
+<br>
+<br>
+
+*Sample GET request tested using Postman collection.*
+
+<img src="screenshots/Postman_GET_RPM.png" alt="Postman API Testing Screenshot" width="700"/>
+
+<br>
+<br>
+
+*Sample POST request tested using Postman collection.*
+
+<img src="screenshots/Postman_POST.png" alt="Postman API Testing Screenshot" width="700"/>
+
+<br>
+<br>
 
 # How to Run the Project:
 
