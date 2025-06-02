@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
-from analyze import get_rpm_data # Import function from analyze.py
+from analyze import get_rpm_data # Import rpm function from analyze.py
+from analyze import get_pto_data # Import pto function from analyze.py
 
 # Function to plot RPM data
 def plot_rpm():
@@ -13,5 +14,17 @@ def plot_rpm():
     plt.savefig("display/rpm_plot.png")
     plt.show()
 
+def plot_pto():
+    df = get_pto_data('db/telemetry.db')
+    plt.plot(df['timestamp'], df['pto_on'].astype(int))
+    plt.xlabel('Timestamp')
+    plt.ylabel('PTO Activation (1 = ON, 0 = OFF)')
+    plt.title('Engine PTO Activation Over Time')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig("display/pto_plot.png")
+    plt.show()
+
 if __name__ == "__main__":
     plot_rpm()
+    plot_pto()
