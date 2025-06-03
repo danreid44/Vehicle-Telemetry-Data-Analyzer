@@ -75,7 +75,7 @@ python simulate.py # Generate Simulated Telemetry Data
 
 python main.py # Load Data into SQLite Database
 
-python display.py # Display Engine RPM Over Time
+python display.py # Display Engine RPM and PTO activations Over Time
 
 streamlit run dashboard.py # Run the Dashboard
 
