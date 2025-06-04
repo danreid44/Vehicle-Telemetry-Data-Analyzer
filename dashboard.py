@@ -56,6 +56,7 @@ with tab0:
     st.markdown("---")
     st.caption("This summary shows key metrics from the latest simulated data in the telemetry database.")
 
+
 # Engine RPM Tab
 with tab1:
     st.subheader("Engine RPM Over Time")
@@ -71,6 +72,14 @@ with tab1:
     with st.expander("Show Raw RPM Data"):
         st.dataframe(df_rpm)
 
+    # Download RPM Data as CSV
+    st.download_button(
+        label="Download RPM Data as CSV",
+        data=df_rpm.to_csv(index=False),
+        file_name="rpm_data.csv",
+        mime="text/csv"
+    )
+
 # PTO Activation Tab
 with tab2:
     st.subheader("PTO Activation Timeline")
@@ -85,6 +94,15 @@ with tab2:
     with st.expander("Show Raw PTO Data"):
         st.dataframe(df_pto)
 
+    # Download PTO Data as CSV
+    st.download_button(
+        label="Download PTO Data as CSV",
+        data=df_pto.to_csv(index=False),
+        file_name="pto_data.csv",
+        mime="text/csv"
+    )
+    
+# Fault Codes Tab
 with tab3:
     st.subheader("Fault Codes Overview")
     st.markdown("This section shows any fault codes detected in the telemetry data.")
@@ -95,7 +113,16 @@ with tab3:
         st.dataframe(df_fault)
         st.markdown(f"Total Faults: {len(df_fault)}")
         st.markdown("Fault codes are represented by SPN (Suspect Parameter Number) and FMI (Failure Mode Identifier).")
-        
+
+    # Download Fault Codes as CSV
+    st.download_button(
+        label="Download Fault Codes as CSV",
+        data=df_fault.to_csv(index=False),
+        file_name="fault_data.csv",
+        mime="text/csv"
+    )
+
+
 # Footer
 st.markdown("---")
 st.caption("Developed by Dan Reid • Simulated CAN/J1939 Data • Powered by Streamlit")
