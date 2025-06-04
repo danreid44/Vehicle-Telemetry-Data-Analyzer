@@ -27,7 +27,7 @@ st.title("Vehicle Telemetry Dashboard")
 st.markdown("Analyze simulated J1939 vehicle data: engine RPM, PTO activation, and more.")
 
 # Tabbed layout
-tab0, tab1, tab2, tab3 = st.tabs(["Dashboard Summary","Engine RPM", "PTO Activation", "Fault Codes"])
+tab0, tab1, tab2, tab3, tab4 = st.tabs(["Dashboard Summary","Engine RPM", "PTO Activation", "Fault Codes", "About"])
 
 # Dashboard Summary Tab
 with tab0:
@@ -101,7 +101,7 @@ with tab2:
         file_name="pto_data.csv",
         mime="text/csv"
     )
-    
+
 # Fault Codes Tab
 with tab3:
     st.subheader("Fault Codes Overview")
@@ -122,7 +122,22 @@ with tab3:
         mime="text/csv"
     )
 
+with tab4:
+    st.subheader("About This Dashboard")
+    st.markdown("""
+    This dashboard provides an interactive way to analyze simulated J1939 vehicle telemetry data.
+    
+    - **Engine RPM**: Displays engine RPM over time with key statistics.
+    - **PTO Activation**: Shows PTO activation status and duration.
+    - **Fault Codes**: Lists any fault codes detected in the telemetry data.
+    - **SQLite database** for telemetry storage
+    - **REST API access** via Postman for CRUD operations
+    
+    Th raw data can be downloaded as CSV files for further analysis.
+                
+    """)
 
+                
 # Footer
 st.markdown("---")
 st.caption("Developed by Dan Reid • Simulated CAN/J1939 Data • Powered by Streamlit")
