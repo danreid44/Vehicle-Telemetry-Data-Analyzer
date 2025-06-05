@@ -33,6 +33,26 @@ def get_pto_data():
     df['pto_on'] = df['data'].apply(lambda d: d[:2] == "01") # Convert hex data to PTO status
     return jsonify(df.to_dict(orient="records"))
 
+# Route to get fault telemetry data
+@app.route("/api/faults", methods=["GET"])
+def get_fault_data():
+    def decode_fault(hex_str):
+        try:
+            spn = int(hex_str[:4], 16)
+            fmi = int(hex_str[4:6], 16)
+            return spn, fmi
+        except:
+            return None, None
+
+    conn = sqlite3.connect(DB_PATH)
+    df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x0CFE6CEE'", conn)
+    conn.close()
+
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    df[['spn', 'fmi']] = df['data'].apply(lambda d: pd.Series(decode_fault(d)))
+    df = df.dropna()
+
+    return jsonify(df[['timestamp', 'spn', 'fmi']].to_dict(orient="records"))
 
 # Route to post new telemetry data
 @app.route("/api/telemetry", methods=["POST"])
