@@ -40,10 +40,12 @@ class PTOStateMachine:
         return prefix + ''.join(random.choices('0123456789ABCDEF', k=6)), self.pto_on # Pad to 8 characters
 
 # Simulate a generic fault code in hex format
+VALID_SPNS = [100, 190, 723, 84, 91, 108, 639, 110, 111]
+
 class FaultGenerator:
     def simulate_fault_hex(self):
-        spn = random.randint(100, 9999)  # SPN (Suspect Parameter Number)
-        fmi = random.randint(0, 31)      # FMI (Failure Mode Identifier)
+        spn = random.choice(VALID_SPNS)  # SPN (Suspect Parameter Number)
+        fmi = random.randint(0, 5)      # FMI (Failure Mode Identifier)
         return f"{spn:04X}{fmi:02X}00"   # SPN(4 hex) + FMI(2 hex) + pad to 8 characters
     
     def __init__(self):

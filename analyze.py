@@ -58,7 +58,7 @@ def get_pto_stats(db_file):
 
 # Function to get fault codes from SQLite database
 # Assume: first 4 hex chars as SPN, next 2 hex chars as FMI
-def get_fault_data(db_file):
+def get_fault_data(db_file, decoder_path="data/spn_fmi_decoder.csv"):
     def decode_fault(hex_str):
         try:
             spn = int(hex_str[:4], 16) # Convert first 4 hex chars to SPN
@@ -74,4 +74,9 @@ def get_fault_data(db_file):
     df['timestamp'] = pd.to_datetime(df['timestamp']) # Convert timestamp to datetime
     df[['spn', 'fmi']] = df['data'].apply(lambda d: pd.Series(decode_fault(d))) # Split data into SPN and FMI columns
     df.dropna(inplace=True)
+
+     # Load decoder CSV
+    decoder = pd.read_csv(decoder_path)
+    df = df.merge(decoder, on=["spn", "fmi"], how="left")
+
     return df
