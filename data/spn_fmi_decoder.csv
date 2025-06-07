@@ -1,0 +1,22 @@
+spn,fmi,description
+100,0,Engine Oil Pressure - Above Normal
+100,1,Engine Oil Pressure - Below Normal
+100,4,Engine Oil Pressure - Voltage Too Low
+110,0,Engine Coolant Temperature - Above Normal
+110,1,Engine Coolant Temperature - Below Normal
+110,3,Engine Coolant Temperature - Voltage Too High
+111,1,Engine Coolant Level - Low
+111,2,Engine Coolant Level - Erratic
+190,0,Engine Speed - Above Normal
+190,2,Engine Speed - Erratic
+91,4,Accelerator Pedal Position - Voltage Too Low
+91,3,Accelerator Pedal Position - Voltage Too High
+84,0,Wheel-Based Speed - Above Normal
+84,2,Wheel-Based Speed - Erratic Signal
+723,5,PTO Governor State - Current Below Normal
+639,2,Battery Voltage - Erratic
+639,3,Battery Voltage - Too High
+639,4,Battery Voltage - Too Low
+108,1,Barometric Pressure - Below Normal
+108,0,Barometric Pressure - Above Normal
+723,2,PTO Governor State - Erratic

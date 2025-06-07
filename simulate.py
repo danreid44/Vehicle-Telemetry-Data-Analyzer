@@ -41,11 +41,22 @@ class PTOStateMachine:
 
 # Simulate a generic fault code in hex format
 VALID_SPNS = [100, 190, 723, 84, 91, 108, 639, 110, 111]
+RELEVANT_FMIS = {
+    100: [0, 1, 4],
+    110: [0, 1, 3],
+    111: [1, 2],
+    190: [0, 2],
+    91:  [3, 4],
+    84:  [0, 2],
+    723: [2, 5],
+    639: [2, 3, 4],
+    108: [0, 1]}
+
 
 class FaultGenerator:
     def simulate_fault_hex(self):
         spn = random.choice(VALID_SPNS)  # SPN (Suspect Parameter Number)
-        fmi = random.randint(0, 5)      # FMI (Failure Mode Identifier)
+        fmi = random.randint(RELEVANT_FMIS[spn])    # FMI (Failure Mode Identifier)
         return f"{spn:04X}{fmi:02X}00"   # SPN(4 hex) + FMI(2 hex) + pad to 8 characters
     
     def __init__(self):

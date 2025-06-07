@@ -71,13 +71,15 @@ source venv/bin/activate # On Windows: .\venv\Scripts\activate
 ```bash
 pip install -r requirements.txt # Install required packages
 
-python simulate.py # Generate Simulated Telemetry Data
+./clear.sh # Clear existing telemtry data
 
-python main.py # Load Data into SQLite Database
+python simulate.py # Generate simulated telemetry data
 
-python display.py # Display Engine RPM and PTO activations Over Time
+python main.py # Load data into SQLite database
 
-streamlit run dashboard.py # Run the Dashboard
+python display.py # Display engine RPM and PTO activations over time
+
+streamlit run dashboard.py # Run the dashboard
 
 python api.py # Launch API routes and Flask app on http://127.0.0.1:5000
 ```
