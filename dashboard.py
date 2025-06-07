@@ -110,7 +110,7 @@ with tab3:
     if df_fault.empty:
         st.success("No fault codes detected in the current dataset.")
     else:
-        st.dataframe(df_fault)
+        st.dataframe(df_fault[['timestamp', 'spn', 'fmi', 'description']])
         st.markdown(f"Total Faults: {len(df_fault)}")
         st.markdown("Fault codes are represented by SPN (Suspect Parameter Number) and FMI (Failure Mode Identifier).")
 

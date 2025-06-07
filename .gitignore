@@ -6,3 +6,6 @@ venv/
 .vscode/
 .DS_Store
 Thumbs.db
+data/telemetry.csv
+db/telemetry.db
+display/*.png

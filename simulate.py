@@ -56,7 +56,7 @@ RELEVANT_FMIS = {
 class FaultGenerator:
     def simulate_fault_hex(self):
         spn = random.choice(VALID_SPNS)  # SPN (Suspect Parameter Number)
-        fmi = random.randint(RELEVANT_FMIS[spn])    # FMI (Failure Mode Identifier)
+        fmi = random.choice(RELEVANT_FMIS[spn])    # FMI (Failure Mode Identifier)
         return f"{spn:04X}{fmi:02X}00"   # SPN(4 hex) + FMI(2 hex) + pad to 8 characters
     
     def __init__(self):

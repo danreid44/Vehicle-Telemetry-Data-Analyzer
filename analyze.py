@@ -75,7 +75,7 @@ def get_fault_data(db_file, decoder_path="data/spn_fmi_decoder.csv"):
     df[['spn', 'fmi']] = df['data'].apply(lambda d: pd.Series(decode_fault(d))) # Split data into SPN and FMI columns
     df.dropna(inplace=True)
 
-     # Load decoder CSV
+    # Load decoder CSV
     decoder = pd.read_csv(decoder_path)
     df = df.merge(decoder, on=["spn", "fmi"], how="left")
     df['description'] = df['description'].fillna("Unknown SPN/FMI")

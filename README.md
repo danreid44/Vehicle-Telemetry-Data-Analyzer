@@ -71,8 +71,6 @@ source venv/bin/activate # On Windows: .\venv\Scripts\activate
 ```bash
 pip install -r requirements.txt # Install required packages
 
-./clear.sh # Clear existing telemtry data
-
 python simulate.py # Generate simulated telemetry data
 
 python main.py # Load data into SQLite database
