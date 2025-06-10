@@ -17,6 +17,14 @@ rpm_stats = get_rpm_stats(DB_PATH)
 pto_stats = get_pto_stats(DB_PATH)
 df_fault = get_fault_data(DB_PATH)
 
+# Function to highlight severity in fault codes
+def highlight_severity(val):
+    color = {
+        "Critical": "red",
+        "Warning": "orange",
+        "Info": "green",
+    }.get(val, "black")  # Fallback color
+    return f"color: {color}; font-weight: bold;"
 
 # Streamlit page settings
 st.set_page_config(
@@ -110,9 +118,14 @@ with tab3:
     if df_fault.empty:
         st.success("No fault codes detected in the current dataset.")
     else:
-        st.dataframe(df_fault[['timestamp', 'spn', 'fmi', 'description']])
-        st.markdown(f"Total Faults: {len(df_fault)}")
-        st.markdown("Fault codes are represented by SPN (Suspect Parameter Number) and FMI (Failure Mode Identifier).")
+        styled_df = df_fault[["timestamp", "spn", "fmi", "description", "severity"]].style.applymap(
+            highlight_severity, subset=["severity"]
+        )
+        st.dataframe(styled_df, use_container_width=True)
+    
+    # List number of faults and overview of fault codes
+    st.markdown(f"Total Faults: {len(df_fault)}")
+    st.markdown("Fault codes are represented by SPN (Suspect Parameter Number) and FMI (Failure Mode Identifier).")
 
     # Download Fault Codes as CSV
     st.download_button(

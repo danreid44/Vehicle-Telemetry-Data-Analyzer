@@ -66,6 +66,15 @@ def get_fault_data(db_file, decoder_path="data/spn_fmi_decoder.csv"):
             return spn, fmi
         except:
             return None, None
+        
+    def classify_severity(fmi):
+        if fmi in [0, 1]:
+            return "Critical"
+        elif fmi in [2, 3, 4]:
+            return "Warning"
+        else:
+            return "Info"
+
 
     conn = sqlite3.connect(db_file)
     df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x0CFE6CEE'", conn) # Fetch fault data
@@ -79,5 +88,7 @@ def get_fault_data(db_file, decoder_path="data/spn_fmi_decoder.csv"):
     decoder = pd.read_csv(decoder_path)
     df = df.merge(decoder, on=["spn", "fmi"], how="left")
     df['description'] = df['description'].fillna("Unknown SPN/FMI")
+    df['severity'] = df['fmi'].apply(classify_severity)
+    
 
     return df
