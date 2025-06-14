@@ -1,8 +1,13 @@
 import sqlite3
 import csv
+import os
 
 # Function to load telemetry data from CSV to SQLite database
 def load_to_db(csv_file, db_file):
+    db_dir = os.path.dirname(db_file)
+    if db_dir and not os.path.exists(db_dir):
+        os.makedirs(db_dir) # Ensure the folder for the database exists
+        
     conn = sqlite3.connect(db_file) # Connect to SQLite database
     cur = conn.cursor() # Create a cursor object to execute SQL commands
 
