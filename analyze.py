@@ -55,27 +55,28 @@ def get_pto_stats(db_file):
         "pto_duration_min": round(engaged_duration_sec / 60, 2)
     }
 
-
-# Function to get fault codes from SQLite database
+# Function to decode fault codes from hex string
 # Assume: first 4 hex chars as SPN, next 2 hex chars as FMI
-def get_fault_data(db_file, decoder_path="data/spn_fmi_decoder.csv"):
-    def decode_fault(hex_str):
+def decode_fault(hex_str):
         try:
             spn = int(hex_str[:4], 16) # Convert first 4 hex chars to SPN
             fmi = int(hex_str[4:6], 16) # Convert next 2 hex chars to FMI
             return spn, fmi
         except:
             return None, None
-        
-    def classify_severity(fmi):
+
+# Function to classify severity based on FMI
+def classify_severity(fmi):
         if fmi in [0, 1]:
             return "Critical"
         elif fmi in [2, 3, 4]:
             return "Warning"
         else:
             return "Info"
+        
 
-
+# Function to get fault codes from SQLite database
+def get_fault_data(db_file, decoder_path="data/spn_fmi_decoder.csv"):
     conn = sqlite3.connect(db_file)
     df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x0CFE6CEE'", conn) # Fetch fault data
     conn.close()
@@ -90,5 +91,23 @@ def get_fault_data(db_file, decoder_path="data/spn_fmi_decoder.csv"):
     df['description'] = df['description'].fillna("Unknown SPN/FMI")
     df['severity'] = df['fmi'].apply(classify_severity)
     
-
     return df
+
+# Function to get top N fault codes
+def get_fault_frequency(df_fault, top_n=10):
+    def wrap_text(text, width=30):
+        # Insert line break at nearest space before width
+        import textwrap
+        return "\n".join(textwrap.wrap(text, width=width))
+
+    df_fault["wrapped_description"] = df_fault["description"].apply(lambda d: wrap_text(d, width=25))
+
+    # Group by description and severity, count occurrences, and sort
+    freq = (df_fault
+            .groupby(["wrapped_description", "severity"])
+            .size()
+            .reset_index(name="count")
+            .sort_values("count", ascending=False)
+            .head(top_n)
+    )
+    return freq.reset_index().rename(columns={0: "count"})

@@ -1,12 +1,14 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
+import altair as alt
 from analyze import (
     get_rpm_data,
     get_rpm_stats,
     get_pto_data,
     get_pto_stats,
-    get_fault_data
+    get_fault_data,
+    get_fault_frequency
 ) # Importing functions from analyze.py
 
 # Load data
@@ -16,6 +18,8 @@ df_pto = get_pto_data(DB_PATH)
 rpm_stats = get_rpm_stats(DB_PATH)
 pto_stats = get_pto_stats(DB_PATH)
 df_fault = get_fault_data(DB_PATH)
+fault_freq = get_fault_frequency(df_fault)
+
 
 # Function to highlight severity in fault codes
 def highlight_severity(val):
@@ -115,6 +119,23 @@ with tab3:
     st.subheader("Fault Codes Overview")
     st.markdown("This section shows any fault codes detected in the telemetry data.")
     
+    # Create Altair bar chart
+    chart = alt.Chart(fault_freq).mark_bar().encode(
+        x=alt.X("wrapped_description:N", sort="-y", title="Fault Description"),
+        y=alt.Y("count:Q", title="Count"),
+        color=alt.Color("severity:N", scale=alt.Scale(domain=["Critical", "Warning", "Info"], range=["red", "orange", "green"])),
+        tooltip=["wrapped_description", "count", "severity"]
+    ).properties(
+        width="container",
+        height=400,
+        title="Top Faults by Frequency"
+    ).configure_axisX(
+        labelAngle=0,  # Horizontal labels
+        labelLimit=0 # 
+    )
+    st.altair_chart(chart, use_container_width=True)
+
+    st.subheader("Fault Code Details")
     if df_fault.empty:
         st.success("No fault codes detected in the current dataset.")
     else:

@@ -52,7 +52,7 @@ RELEVANT_FMIS = {
     639: [2, 3, 4],
     108: [0, 1]}
 
-
+# Simulate fault codes with SPN and FMI in hex format
 class FaultGenerator:
     def simulate_fault_hex(self):
         spn = random.choice(VALID_SPNS)  # SPN (Suspect Parameter Number)
