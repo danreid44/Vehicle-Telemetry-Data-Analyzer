@@ -111,3 +111,30 @@ def get_fault_frequency(df_fault, top_n=10):
             .head(top_n)
     )
     return freq.reset_index().rename(columns={0: "count"})
+
+# Function to calculate fault statistics from the fetched data
+def get_fault_stats(df_fault):
+    if df_fault.empty:
+        return {
+            "most_recent": None,
+            "last_fault_time": None,
+            "critical_count": 0,
+            "severity_counts": {}
+        }
+
+    total_faults = len(df_fault)
+    last_fault = df_fault.sort_values("timestamp", ascending=False).iloc[0]
+    critical_count = df_fault[df_fault["severity"] == "Critical"].shape[0]
+    warning_count = df_fault[df_fault["severity"] == "Warning"].shape[0]
+    info_count = df_fault[df_fault["severity"] == "Info"].shape[0]
+    severity_counts = df_fault["severity"].value_counts().to_dict()
+
+    return {
+        "total_faults": total_faults,
+        "most_recent": last_fault,
+        "last_fault_time": last_fault["timestamp"],
+        "critical_count": critical_count,
+        "warning_count": warning_count,
+        "info_count": info_count,
+        "severity_counts": severity_counts
+    }

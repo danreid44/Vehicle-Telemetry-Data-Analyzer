@@ -8,7 +8,8 @@ from analyze import (
     get_pto_data,
     get_pto_stats,
     get_fault_data,
-    get_fault_frequency
+    get_fault_frequency,
+    get_fault_stats
 ) # Importing functions from analyze.py
 
 # Load data
@@ -19,6 +20,7 @@ rpm_stats = get_rpm_stats(DB_PATH)
 pto_stats = get_pto_stats(DB_PATH)
 df_fault = get_fault_data(DB_PATH)
 fault_freq = get_fault_frequency(df_fault)
+fault_stats = get_fault_stats(df_fault)
 
 
 # Function to highlight severity in fault codes
@@ -36,37 +38,43 @@ st.set_page_config(
     layout="wide"
 )
 st.title("Vehicle Telemetry Dashboard")
-st.markdown("Analyze simulated J1939 vehicle data: engine RPM, PTO activation, and more.")
+st.markdown("Analyze simulated J1939 vehicle data: engine RPM, PTO activation, fault codes, and more.")
 
 # Tabbed layout
 tab0, tab1, tab2, tab3, tab4 = st.tabs(["Dashboard Summary","Engine RPM", "PTO Activation", "Fault Codes", "About"])
 
 # Dashboard Summary Tab
 with tab0:
-    st.subheader("Dashboard Summary")
+    st.subheader("System Summary")
 
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.markdown("RPM Statistics")
+        st.markdown("**RPM Statistics**")
         st.metric("Min RPM", f"{rpm_stats['min_rpm']} RPM")
         st.metric("Max RPM", f"{rpm_stats['max_rpm']} RPM")
         st.metric("Avg RPM", f"{rpm_stats['avg_rpm']} RPM")
 
     with col2:
-        st.markdown("PTO Activity")
+        st.markdown("**PTO Activity**")
         st.metric("Total PTO Duration", f"{pto_stats['pto_duration_min']} min")
         st.metric("PTO Activation Count", f"{pto_stats['pto_usage_count']} times")
 
     with col3:
-        st.markdown("Fault Codes")
+        st.markdown("**Fault Codes**")
         if df_fault.empty:
             st.success("No fault codes detected.")
         else:
-            st.metric("Total Faults", f"{len(df_fault)}")
+            st.metric("Total Faults", f"{fault_stats['total_faults']}")
+            st.metric("Critical Faults", f"{fault_stats['critical_count']}")
+            st.metric("Warning Faults", f"{fault_stats['warning_count']}")
 
     st.markdown("---")
-    st.caption("This summary shows key metrics from the latest simulated data in the telemetry database.")
+    st.markdown("""
+    This summary shows key metrics from the latest simulated data in the telemetry database. 
+    Please explore the tabs for detailed analysis on each of these parameters.
+    
+    """)
 
 
 # Engine RPM Tab
@@ -74,14 +82,14 @@ with tab1:
     st.subheader("Engine RPM Over Time")
     st.line_chart(df_rpm.set_index("timestamp")["rpm"])
     
+    st.subheader("RPM Statistics")
     st.markdown(f"""
-    **RPM Stats**
     - Min: {rpm_stats['min_rpm']} RPM
     - Max: {rpm_stats['max_rpm']} RPM
     - Avg: {rpm_stats['avg_rpm']} RPM
     """)
 
-    with st.expander("Show Raw RPM Data"):
+    with st.expander("**Show Raw RPM Data**"):
         st.dataframe(df_rpm)
 
     # Download RPM Data as CSV
@@ -97,13 +105,13 @@ with tab2:
     st.subheader("PTO Activation Timeline")
     st.line_chart(df_pto.set_index("timestamp")["pto_on"].astype(int))
     
+    st.subheader("PTO Activity Statistics")
     st.markdown(f"""
-    **PTO Stats**
     - Total Duration: {pto_stats['pto_duration_min']} minutes
     - Usage Frequency: {pto_stats['pto_usage_count']} activations
     """)
 
-    with st.expander("Show Raw PTO Data"):
+    with st.expander("**Show Raw PTO Data**"):
         st.dataframe(df_pto)
 
     # Download PTO Data as CSV
@@ -135,7 +143,27 @@ with tab3:
     )
     st.altair_chart(chart, use_container_width=True)
 
-    st.subheader("Fault Code Details")
+    # Display fault code statistics
+    st.subheader("Fault Code Statistics")
+    col1, col2 = st.columns(2)
+    most_recent = fault_stats["most_recent"]
+    if most_recent is None or df_fault.empty:
+        st.success("No fault codes detected in the current dataset.")
+    else:
+        with col1:
+            st.markdown(f"""
+            - Total Faults: {fault_stats['total_faults']}
+            - Critical Faults: {fault_stats['critical_count']}
+            - Warning Faults: {fault_stats['warning_count']}
+            - Info Faults: {fault_stats['info_count']}
+            """)
+        with col2:
+            st.write(f"• Most Recent Fault: {most_recent['wrapped_description']}")
+            st.write(f"• Time: {fault_stats['last_fault_time']}")
+            st.write(f"• Severity: {most_recent['severity']}")
+
+    # Display fault code data with severity highlighting
+    st.subheader("Fault Code Data")
     if df_fault.empty:
         st.success("No fault codes detected in the current dataset.")
     else:
@@ -144,10 +172,6 @@ with tab3:
         )
         st.dataframe(styled_df, use_container_width=True)
     
-    # List number of faults and overview of fault codes
-    st.markdown(f"Total Faults: {len(df_fault)}")
-    st.markdown("Fault codes are represented by SPN (Suspect Parameter Number) and FMI (Failure Mode Identifier).")
-
     # Download Fault Codes as CSV
     st.download_button(
         label="Download Fault Codes as CSV",
@@ -156,6 +180,9 @@ with tab3:
         mime="text/csv"
     )
     
+    # List number of faults and overview of fault codes
+    st.markdown("Fault codes are represented by SPN (Suspect Parameter Number) and FMI (Failure Mode Identifier).")
+
 # About Tab
 with tab4:
     st.subheader("About This Dashboard")
