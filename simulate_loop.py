@@ -135,7 +135,8 @@ def simulate_loop(interval=1.0):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    # Add argument for interval between data points
     parser.add_argument("-interval", type=float, default=1.0, help="Interval between data points in seconds (e.g. 0.1 for 10Hz)")
     args = parser.parse_args()
 
-    simulate_loop(interval=args.interval)
+    simulate_loop(interval=args.interval) # Run the simulation loop with specified interval
