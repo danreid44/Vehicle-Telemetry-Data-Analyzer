@@ -1,7 +1,15 @@
 import streamlit as st
+
+# Streamlit page settings
+st.set_page_config(
+    page_title="Vehicle Telemetry Dashboard",
+    layout="wide"
+)
+
 import sqlite3
 import pandas as pd
 import altair as alt
+import time
 from analyze import (
     get_rpm_data,
     get_rpm_stats,
@@ -11,6 +19,13 @@ from analyze import (
     get_fault_frequency,
     get_fault_stats
 ) # Importing functions from analyze.py
+
+# Refresh the dashboard every 5 seconds
+live_refresh = st.sidebar.checkbox("Live Refresh (every 5s)", value=True)
+
+if live_refresh:
+    from streamlit_autorefresh import st_autorefresh
+    st_autorefresh(interval=5000, key="dashboard_refresh")
 
 # Load data
 DB_PATH = "db/telemetry.db"
@@ -32,11 +47,7 @@ def highlight_severity(val):
     }.get(val, "black")  # Fallback color
     return f"color: {color}; font-weight: bold;"
 
-# Streamlit page settings
-st.set_page_config(
-    page_title="Vehicle Telemetry Dashboard",
-    layout="wide"
-)
+
 st.title("Vehicle Telemetry Dashboard")
 st.markdown("Analyze simulated J1939 vehicle data: engine RPM, PTO activation, fault codes, and more.")
 
@@ -46,6 +57,8 @@ tab0, tab1, tab2, tab3, tab4 = st.tabs(["Dashboard Summary","Engine RPM", "PTO A
 # Dashboard Summary Tab
 with tab0:
     st.subheader("System Summary")
+    refresh_status = "Active" if live_refresh else "Paused"
+    st.caption(f"Live Refresh: {refresh_status} — Last updated {time.strftime('%H:%M:%S')}")
 
     col1, col2, col3 = st.columns(3)
 
@@ -75,8 +88,7 @@ with tab0:
     Please explore the tabs for detailed analysis on each of these parameters.
     
     """)
-
-
+    
 # Engine RPM Tab
 with tab1:
     st.subheader("Engine RPM Over Time")
@@ -190,12 +202,12 @@ with tab4:
     This dashboard provides an interactive way to analyze simulated J1939 vehicle telemetry data.
     
     - **Engine RPM**: Displays engine RPM over time with key statistics.
-    - **PTO Activation**: Shows PTO activation status and duration.
-    - **Fault Codes**: Lists any fault codes detected in the telemetry data.
+    - **PTO Activation**: Shows PTO activation timeline and stats.
+    - **Fault Codes**: Shows detected fault codes with severity levels and frequency.
     - **SQLite database** for telemetry storage
     - **REST API access** via Postman for CRUD operations
     
-    Th raw data can be downloaded as CSV files for further analysis.
+    The raw data can be downloaded as CSV files for further analysis.
                 
     """)
 

@@ -59,6 +59,8 @@ def get_pto_stats(db_file):
 # Assume: first 4 hex chars as SPN, next 2 hex chars as FMI
 def decode_fault(hex_str):
         try:
+            if not isinstance(hex_str, str) or len(hex_str) < 6: # Validate input
+                return None, None
             spn = int(hex_str[:4], 16) # Convert first 4 hex chars to SPN
             fmi = int(hex_str[4:6], 16) # Convert next 2 hex chars to FMI
             return spn, fmi
@@ -82,8 +84,16 @@ def get_fault_data(db_file, decoder_path="data/spn_fmi_decoder.csv"):
     conn.close()
 
     df['timestamp'] = pd.to_datetime(df['timestamp']) # Convert timestamp to datetime
-    df[['spn', 'fmi']] = df['data'].apply(lambda d: pd.Series(decode_fault(d))) # Split data into SPN and FMI columns
-    df.dropna(inplace=True)
+
+    if df.empty or 'data' not in df.columns:
+        return pd.DataFrame(columns=["timestamp", "spn", "fmi", "description", "severity"])
+
+    # Filter out invalid data
+    df = df[df['data'].apply(lambda x: isinstance(x, str) and len(x) >= 6)] 
+
+    # Split data into SPN and FMI columns
+    df[['spn', 'fmi']] = df['data'].apply(lambda d: pd.Series(decode_fault(d))) 
+    df.dropna(subset=['spn', 'fmi'], inplace=True)
 
     # Load decoder CSV
     decoder = pd.read_csv(decoder_path)

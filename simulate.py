@@ -54,14 +54,14 @@ RELEVANT_FMIS = {
 
 # Simulate fault codes with SPN and FMI in hex format
 class FaultGenerator:
+    def __init__(self):
+        self.active = False
+        self.timer = random.randint(300, 2400)  # Initial fault timer (5-40 minutes)
+
     def simulate_fault_hex(self):
         spn = random.choice(VALID_SPNS)  # SPN (Suspect Parameter Number)
         fmi = random.choice(RELEVANT_FMIS[spn])    # FMI (Failure Mode Identifier)
         return f"{spn:04X}{fmi:02X}00"   # SPN(4 hex) + FMI(2 hex) + pad to 8 characters
-    
-    def __init__(self):
-        self.active = False
-        self.timer = random.randint(300, 2400)  # Initial fault timer (5-40 minutes)
 
     def maybe_emit_fault(self):
         if self.timer <= 0:
@@ -72,10 +72,10 @@ class FaultGenerator:
                 self.active = False
                 self.timer = random.randint(600, 1800)  # Reset timer for next fault in 10-30 minutes
         else:
-            self.timer -= 1
+            self.timer -= 1 # Decrement timer
 
         if self.active:
-            return self.simulate_fault_hex()
+            return self.simulate_fault_hex() # Emit fault code
         return None
 
 # Generate 3600 rows of telemetry data, equivalent to 1 hour

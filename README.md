@@ -82,6 +82,12 @@ streamlit run dashboard.py # Run the dashboard
 python api.py # Launch API routes and Flask app on http://127.0.0.1:5000
 ```
 
+## 4. Live Simulated Data Demo ##
+```bash
+./clear.sh  # Clear existing data
+./live_demo.sh  # Run simulation loop data script and dashboard
+python simulate_loop.py -interval 0.1   # Change data generation rate (default 1s)
+```
 
 ## API Endpoints ##
 

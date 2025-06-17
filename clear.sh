@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Bash script to clear telemetry CSV and database 
-# Execute file: ./clear.sh
 
 # Delete telemetry CSV in data directory
 if [ -e data/telemetry.csv ]; then
