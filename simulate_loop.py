@@ -28,13 +28,19 @@ class RPMGenerator:
 class PTOStateMachine:
     def __init__(self):
         self.pto_on = False # Initial state
-        self.timer = random.randint(1200, 1800) # Start with PTO off, wait 20-30 minutes
+        self.timer = random.randint(300, 480) # Start with PTO off, wait 5-8 minutes
+        self.last_update = time.time()
 
     def next_state(self):
+        now = time.time()
+        elapsed = now - self.last_update # Calculate elapsed time since last update
+        self.last_update = now # Update last update time
+
+        self.timer -= elapsed # Decrement timer based on elapsed time
+
         if self.timer <= 0: # Time to change state
             self.pto_on = not self.pto_on   # Toggle PTO state
-            self.timer = random.randint(60, 180) if self.pto_on else random.randint(1200, 1800) # Reset timer
-        self.timer -= 1 # Decrement timer
+            self.timer = random.randint(60, 180) if self.pto_on else random.randint(600, 1200) # Reset timer
         return self.pto_on
 
     def simulate_pto_hex(self):
@@ -52,7 +58,8 @@ RELEVANT_FMIS = {
 class FaultGenerator:
     def __init__(self):
         self.active = False
-        self.timer = random.randint(300, 2400) # Initial fault timer (5-40 minutes)
+        self.timer = random.randint(120, 240) # Initial fault timer (2-4 minutes)
+        self.last_update = time.time()
 
     def simulate_fault_hex(self):
         spn = random.choice(VALID_SPNS) # SPN (Suspect Parameter Number)
@@ -60,15 +67,19 @@ class FaultGenerator:
         return f"{spn:04X}{fmi:02X}00" # SPN(4 hex) + FMI(2 hex) + pad to 8 characters
 
     def maybe_emit_fault(self):
+        now = time.time()
+        elapsed = now - self.last_update # Calculate elapsed time since last update
+        self.last_update = now # Update last update time
+
         if self.timer <= 0:
             if not self.active:
                 self.active = True
                 self.timer = random.randint(5, 30) # Active for 5-30 seconds
             else:
                 self.active = False
-                self.timer = random.randint(600, 1800) # Reset timer for next fault (10-30 minutes)
+                self.timer = random.randint(300, 420) # Reset timer for next fault (5-7 minutes)
         else:
-            self.timer -= 1 # Decrement timer
+            self.timer -= elapsed # Decrement timer based on elapsed time
 
         if self.active:
             return self.simulate_fault_hex() # Emit fault code
