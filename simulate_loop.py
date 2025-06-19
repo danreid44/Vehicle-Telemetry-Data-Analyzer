@@ -12,13 +12,13 @@ class RPMGenerator:
     def get_next(self, pto_engaged, elapsed):
         # Choose target based on PTO state
         target = random.uniform(900, 1300) if pto_engaged else random.uniform(1200, 2500)
-        step = 50 * elapsed  # How quickly RPM can change per second
+        step = 50  # How quickly RPM can change per second
 
         # Smooth toward target
         if abs(self.current_rpm - target) > step:
             self.current_rpm += step if target > self.current_rpm else -step
         else:
-            self.current_rpm = target
+            self.current_rpm = target # Snap to target if within step
 
         scaled = int(self.current_rpm * 4) # Match the hex_to_rpm scaling (÷4)
         return f"{scaled:04X}" + "0000" # 4-digit hex + 4 zeroes
