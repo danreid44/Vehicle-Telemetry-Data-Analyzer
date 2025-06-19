@@ -7,12 +7,12 @@ from datetime import datetime, timezone
 # Generate realistic RPM hex data based on PTO state 
 class RPMGenerator:
     def __init__(self):
-        self.current_rpm = random.randint(1000, 1300) # Initial RPM between 1000 and 1300
+        self.current_rpm = random.uniform(1000, 1300) # Initial RPM between 1000 and 1300
 
-    def get_next(self, pto_engaged):
+    def get_next(self, pto_engaged, elapsed):
         # Choose target based on PTO state
-        target = random.randint(900, 1300) if pto_engaged else random.randint(1200, 2500)
-        step = 50   # How quickly RPM can change per second
+        target = random.uniform(900, 1300) if pto_engaged else random.uniform(1200, 2500)
+        step = 50 * elapsed  # How quickly RPM can change per second
 
         # Smooth toward target
         if abs(self.current_rpm - target) > step:
@@ -28,24 +28,23 @@ class RPMGenerator:
 class PTOStateMachine:
     def __init__(self):
         self.pto_on = False # Initial state
-        self.timer = random.randint(300, 480) # Start with PTO off, wait 5-8 minutes
-        self.last_update = time.time()
+        self.timer = random.uniform(120, 180) # Start with PTO off, wait 2-3 minutes as float
+        self.cached_hex = self._generate_hex()
 
-    def next_state(self):
-        now = time.time()
-        elapsed = now - self.last_update # Calculate elapsed time since last update
-        self.last_update = now # Update last update time
+    def _generate_hex(self):
+        prefix = "01" if self.pto_on else "00"
+        return prefix + ''.join(random.choices('0123456789ABCDEF', k=6))
 
+    def next_state(self, elapsed):
         self.timer -= elapsed # Decrement timer based on elapsed time
-
         if self.timer <= 0: # Time to change state
             self.pto_on = not self.pto_on   # Toggle PTO state
-            self.timer = random.randint(60, 180) if self.pto_on else random.randint(600, 1200) # Reset timer
+            self.timer = random.uniform(60, 180) if self.pto_on else random.uniform(300, 420) # Reset timer to 1-3 minutes if PTO on, 5-7 minutes if PTO off
+            self.cached_hex = self._generate_hex()  # Only update when state toggles
         return self.pto_on
 
     def simulate_pto_hex(self):
-        prefix = "01" if self.pto_on else "00"
-        return prefix + ''.join(random.choices('0123456789ABCDEF', k=6)), self.pto_on
+        return self.cached_hex, self.pto_on
 
 # Simulate a generic fault code in hex format
 VALID_SPNS = [100, 190, 723, 84, 91, 108, 639, 110, 111]
@@ -58,31 +57,27 @@ RELEVANT_FMIS = {
 class FaultGenerator:
     def __init__(self):
         self.active = False
-        self.timer = random.randint(120, 240) # Initial fault timer (2-4 minutes)
-        self.last_update = time.time()
+        self.timer = random.uniform(60, 90) # Initial fault timer (1-1.5 minutes) as float
+        self.emitted_this_cycle = False
 
     def simulate_fault_hex(self):
         spn = random.choice(VALID_SPNS) # SPN (Suspect Parameter Number)
         fmi = random.choice(RELEVANT_FMIS[spn]) # FMI (Failure Mode Identifier)
         return f"{spn:04X}{fmi:02X}00" # SPN(4 hex) + FMI(2 hex) + pad to 8 characters
 
-    def maybe_emit_fault(self):
-        now = time.time()
-        elapsed = now - self.last_update # Calculate elapsed time since last update
-        self.last_update = now # Update last update time
-
+    def maybe_emit_fault(self, elapsed):
+        self.timer -= elapsed
         if self.timer <= 0:
             if not self.active:
                 self.active = True
-                self.timer = random.randint(5, 30) # Active for 5-30 seconds
+                self.timer = random.uniform(5, 30) # Active for 5-30 seconds
+                self.emitted_this_cycle = False
             else:
                 self.active = False
-                self.timer = random.randint(300, 420) # Reset timer for next fault (5-7 minutes)
-        else:
-            self.timer -= elapsed # Decrement timer based on elapsed time
-
-        if self.active:
-            return self.simulate_fault_hex() # Emit fault code
+                self.timer = random.uniform(300, 420) # Reset timer for next fault (5-7 minutes)
+        if self.active and not self.emitted_this_cycle:
+            self.emitted_this_cycle = True
+            return self.simulate_fault_hex()
         return None
 
 # Database setup function
@@ -109,13 +104,18 @@ def simulate_loop(interval=1.0):
     cur = conn.cursor()
 
     try:
+        prev_time = time.time()
         while True:
+            now = time.time()
+            elapsed = now - prev_time
+            prev_time = now
+
             ts = datetime.now(timezone.utc).isoformat()
 
-            pto_engaged = pto_state.next_state()
-            pto_data, _ = pto_state.simulate_pto_hex()
-            rpm_data = rpm_gen.get_next(pto_engaged)
-            fault_data = fault_gen.maybe_emit_fault()
+            pto_engaged = pto_state.next_state(elapsed) # Get current PTO state
+            pto_data, _ = pto_state.simulate_pto_hex() # Get PTO hex data and state
+            rpm_data = rpm_gen.get_next(pto_engaged, elapsed) # Get next RPM data based on PTO state
+            fault_data = fault_gen.maybe_emit_fault(elapsed) # Check for fault codes
 
             cur.execute("INSERT INTO telemetry (timestamp, can_id, data) VALUES (?, ?, ?)",
                         (ts, '0x18FEF100', pto_data))
