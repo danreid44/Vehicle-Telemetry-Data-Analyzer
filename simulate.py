@@ -9,8 +9,8 @@ class RPMGenerator:
 
     def get_next(self, pto_engaged):
         # Choose target based on PTO state
-        target = random.randint(900, 1300) if pto_engaged else random.randint(1200, 2500)
-        step = 50  # How quickly RPM can change per second
+        target = random.randint(900, 1300) if pto_engaged else random.randint(1200, 3200)
+        step = random.randint(25, 60)  # How quickly RPM can change per second
 
         # Smooth toward target
         if abs(self.current_rpm - target) > step:
