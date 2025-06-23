@@ -38,7 +38,6 @@ This project is a Python-based tool for simulating and analyzing vehicle telemet
 *Dashboard summary of all key metrics of the simulated data.*
 
 <img src="screenshots/Dashboard_Summary.png" alt="Vehicle Telemetry Dashboard Summary Screenshot" width="700"/>
-***
 
 <br>
 <br>
