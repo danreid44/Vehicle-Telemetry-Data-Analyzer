@@ -66,6 +66,29 @@
 			"response": []
 		},
 		{
+			"name": "Get Vehicle Fault Data",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/faults",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"faults"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Add Vehicle Data",
 			"event": [
 				{

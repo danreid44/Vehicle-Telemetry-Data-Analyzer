@@ -9,36 +9,41 @@ This project is a Python-based tool for simulating and analyzing vehicle telemet
 - Data displayed using Streamlit and Matplotlib
 - Backend API routes to perform CRUD operations
 
-## Screenshots ##
+## Project Preview ##
 
 *Dashboard display of engine RPM over time as well as RPM stats.*
 
-<img src="screenshots/Dashboard_RPM.png" alt="Vehicle Telemetry Dashboard RPM Screenshot" width="700"/>
+<img src="screenshots/Dashboard_RPM.gif" alt="Vehicle Telemetry Dashboard RPM Screenshot" width="700"/>
 
 <br>
 <br>
 
-*Dashboard display of PTO activations and stats.*
-
-<img src="screenshots/Dashboard_PTO.png" alt="Vehicle Telemetry Dashboard PTO Screenshot" width="700"/>
-
-<br>
-<br>
-
+***
 *Dashboard display of fault codes and stats.*
 
-<img src="screenshots/Dashboard_Faults.png" alt="Vehicle Telemetry Dashboard Faults Screenshot" width="700"/>
+<img src="screenshots/Dashboard_Faults.gif" alt="Vehicle Telemetry Dashboard Faults Screenshot" width="700"/>
 
 <br>
 <br>
 
+***
+*Dashboard display of PTO activations and stats.*
+
+<img src="screenshots/Dashboard_PTO.gif" alt="Vehicle Telemetry Dashboard PTO Screenshot" width="700"/>
+
+<br>
+<br>
+
+***
 *Dashboard summary of all key metrics of the simulated data.*
 
 <img src="screenshots/Dashboard_Summary.png" alt="Vehicle Telemetry Dashboard Summary Screenshot" width="700"/>
+***
 
 <br>
 <br>
 
+***
 *Sample GET request tested using Postman collection.*
 
 <img src="screenshots/Postman_GET_RPM.png" alt="Postman API Testing Screenshot" width="700"/>
@@ -46,6 +51,7 @@ This project is a Python-based tool for simulating and analyzing vehicle telemet
 <br>
 <br>
 
+***
 *Sample POST request tested using Postman collection.*
 
 <img src="screenshots/Postman_POST.png" alt="Postman API Testing Screenshot" width="700"/>
