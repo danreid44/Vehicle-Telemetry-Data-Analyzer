@@ -23,7 +23,8 @@ def plot_rpm():
 def plot_pto():
     ensure_display_folder()
     df = get_pto_data('db/telemetry.db')
-    plt.plot(df['timestamp'], df['pto_on'].astype(int))
+    plt.figure()
+    plt.plot(df['timestamp'], df['pto_on'].astype(int), label="PTO")
     plt.xlabel('Timestamp')
     plt.ylabel('PTO Activation (1 = ON, 0 = OFF)')
     plt.title('Engine PTO Activation Over Time')
