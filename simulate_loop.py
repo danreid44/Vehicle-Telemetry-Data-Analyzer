@@ -123,6 +123,15 @@ def simulate_loop(interval=1.0):
                             (ts, '0x0CFE6CEE', fault_data))
 
             conn.commit()
+
+            # Limit to last 3600 entries (1 hour) for performance
+            cur.execute('''
+                DELETE FROM telemetry WHERE id NOT IN (
+                    SELECT id FROM telemetry ORDER BY timestamp DESC LIMIT 3600
+                )
+            ''')
+
+            conn.commit()
             time.sleep(interval)
 
     except KeyboardInterrupt:
