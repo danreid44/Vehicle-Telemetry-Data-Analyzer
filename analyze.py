@@ -148,3 +148,22 @@ def get_fault_stats(df_fault):
         "info_count": info_count,
         "severity_counts": severity_counts
     }
+
+# Function to detect RPM anomalies based on rules
+def detect_rpm_anomalies(df):
+    anomalies = []  # List to store detected anomalies
+
+    for i in range(1, len(df)):
+        rpm_now = df.iloc[i]['rpm']
+        rpm_prev = df.iloc[i-2]['rpm']
+        pto_on = df.iloc[i]['pto_on']
+
+        # Rule: RPM > 2000 while PTO is engaged
+        if pto_on and rpm_now > 2000:
+            anomalies.append((df.iloc[i]['timestamp'], "High RPM during PTO"))
+
+        # Rule: Sudden RPM jump (eg. > 110 RPM change in 2 seconds)
+        if abs(rpm_now - rpm_prev) > 110:
+            anomalies.append((df.iloc[i]['timestamp'], "Sudden RPM change"))
+
+    return anomalies
