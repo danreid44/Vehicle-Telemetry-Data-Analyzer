@@ -1,5 +1,6 @@
 import sqlite3 
 import pandas as pd 
+from datetime import datetime, timedelta
 
 
 # Function to fetch RPM data from SQLite database
@@ -102,6 +103,25 @@ def get_fault_data(db_file, decoder_path="data/spn_fmi_decoder.csv"):
     df['severity'] = df['fmi'].apply(classify_severity)
     
     return df
+
+def get_mtbf():
+    if df.empty or 'timestamp' not in df.columns:
+        return None  # No data to analyze
+    
+    df_sorted = df.sort_values("timestamp").reset_index(drop=True)  # Sort by timestamp
+    timestamps = df_sorted['timestamp'].tolist()
+
+    if len(timestamps) < 2:
+        return None  # Not enough data
+
+    deltas = [
+        (timestamps[i] - timestamps[i-1]).total_seconds()
+        for i in range(1, len(timestamps))
+    ]
+
+    mtbf = sum(deltas) / len(deltas)  # Avg seconds between faults
+    return mtbf
+
 
 # Function to get top N fault codes
 def get_fault_frequency(df_fault, top_n=10):

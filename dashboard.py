@@ -17,7 +17,8 @@ from analyze import (
     get_pto_stats,
     get_fault_data,
     get_fault_frequency,
-    get_fault_stats
+    get_fault_stats,
+    get_mtbf
 ) # Importing functions from analyze.py
 
 # Refresh the dashboard every 5 seconds
@@ -36,6 +37,7 @@ pto_stats = get_pto_stats(DB_PATH)
 df_fault = get_fault_data(DB_PATH)
 fault_freq = get_fault_frequency(df_fault)
 fault_stats = get_fault_stats(df_fault)
+mtbf = get_mtbf(df_fault)
 
 
 # Function to highlight severity in fault codes
@@ -46,6 +48,12 @@ def highlight_severity(val):
         "Info": "green",
     }.get(val, "black")  # Fallback color
     return f"color: {color}; font-weight: bold;"
+
+# Display MTBF if available
+if mtbf:
+    st.metric("Mean Time Between Faults", f"{mtbf:.1f} sec")
+else:
+    st.write("Not enough data to calculate MTBF.")
 
 
 st.title("Vehicle Telemetry Dashboard")
@@ -173,6 +181,7 @@ with tab3:
             st.write(f"• Most Recent Fault: {most_recent['wrapped_description']}")
             st.write(f"• Time: {fault_stats['last_fault_time']}")
             st.write(f"• Severity: {most_recent['severity']}")
+            st.metric("Mean Time Between Faults", f"{mtbf:.1f} sec")
 
     # Display fault code data with severity highlighting
     st.subheader("Fault Code Data")
