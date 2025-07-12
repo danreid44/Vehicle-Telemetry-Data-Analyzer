@@ -104,7 +104,7 @@ def get_fault_data(db_file, decoder_path="data/spn_fmi_decoder.csv"):
     
     return df
 
-def get_mtbf():
+def get_mtbf(df):
     if df.empty or 'timestamp' not in df.columns:
         return None  # No data to analyze
     

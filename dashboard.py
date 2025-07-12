@@ -49,12 +49,6 @@ def highlight_severity(val):
     }.get(val, "black")  # Fallback color
     return f"color: {color}; font-weight: bold;"
 
-# Display MTBF if available
-if mtbf:
-    st.metric("Mean Time Between Faults", f"{mtbf:.1f} sec")
-else:
-    st.write("Not enough data to calculate MTBF.")
-
 
 st.title("Vehicle Telemetry Dashboard")
 st.markdown("Analyze simulated J1939 vehicle data: engine RPM, PTO activation, fault codes, and more.")
@@ -88,7 +82,10 @@ with tab0:
         else:
             st.metric("Total Faults", f"{fault_stats['total_faults']}")
             st.metric("Critical Faults", f"{fault_stats['critical_count']}")
-            st.metric("Warning Faults", f"{fault_stats['warning_count']}")
+            if mtbf:
+                st.metric("Mean Time Between Faults", f"{mtbf:.1f} sec")
+            else:
+                st.write("Not enough data to calculate MTBF.")
 
     st.markdown("---")
     st.markdown("""
@@ -176,12 +173,12 @@ with tab3:
             - Critical Faults: {fault_stats['critical_count']}
             - Warning Faults: {fault_stats['warning_count']}
             - Info Faults: {fault_stats['info_count']}
+            - Mean Time Between Faults: {mtbf:.1f} sec
             """)
         with col2:
             st.write(f"• Most Recent Fault: {most_recent['wrapped_description']}")
             st.write(f"• Time: {fault_stats['last_fault_time']}")
             st.write(f"• Severity: {most_recent['severity']}")
-            st.metric("Mean Time Between Faults", f"{mtbf:.1f} sec")
 
     # Display fault code data with severity highlighting
     st.subheader("Fault Code Data")
