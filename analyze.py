@@ -1,7 +1,5 @@
 import sqlite3 
-import pandas as pd 
-from datetime import datetime, timedelta
-
+import pandas as pd
 
 # Function to fetch RPM data from SQLite database
 # Assume: first 4 hex chars as RPM
