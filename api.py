@@ -6,6 +6,21 @@ from datetime import datetime
 app = Flask(__name__) # Flask app instance
 DB_PATH = "db/telemetry.db" # Path to SQLite database file
 
+# Root route
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({
+        "message": "Vehicle Telemetry Data Analyzer API",
+        "endpoints": {
+            "GET /api/rpm": "Get RPM telemetry data",
+            "GET /api/pto": "Get PTO telemetry data",
+            "GET /api/faults": "Get fault data",
+            "POST /api/telemetry": "Add new telemetry data",
+            "PATCH /api/telemetry/<id>": "Update telemetry data",
+            "DELETE /api/telemetry/<id>": "Delete telemetry data"
+        }
+    }), 200
+
 # Database connection function
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)

@@ -6,8 +6,6 @@ st.set_page_config(
     layout="wide"
 )
 
-import sqlite3
-import pandas as pd
 import altair as alt
 import time
 from analyze import (
@@ -21,12 +19,15 @@ from analyze import (
     get_mtbf
 ) # Importing functions from analyze.py
 
+# Import Auto Refresh
+from streamlit_autorefresh import st_autorefresh
+
 # Refresh the dashboard every 5 seconds
 live_refresh = st.sidebar.checkbox("Live Refresh (every 5s)", value=True)
 
 if live_refresh:
-    from streamlit_autorefresh import st_autorefresh
     st_autorefresh(interval=5000, key="dashboard_refresh")
+
 
 # Load data
 DB_PATH = "db/telemetry.db"
@@ -185,7 +186,7 @@ with tab3:
     if df_fault.empty:
         st.success("No fault codes detected in the current dataset.")
     else:
-        styled_df = df_fault[["timestamp", "spn", "fmi", "description", "severity"]].style.applymap(
+        styled_df = df_fault[["timestamp", "spn", "fmi", "description", "severity"]].style.map(
             highlight_severity, subset=["severity"]
         )
         st.dataframe(styled_df, use_container_width=True)
