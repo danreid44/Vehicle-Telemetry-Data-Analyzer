@@ -5,28 +5,27 @@ from datetime import datetime, timezone, timedelta
 # Generate realistic RPM hex data based on PTO state 
 class RPMGenerator:
     def __init__(self):
-        self.current_rpm = random.randint(1000, 1300) # Initial RPM between 1000 and 1300
+        self.current_rpm = random.randint(1000, 1300) # Initial RPM between 1000 and 1300 for realistic cold start
 
     def get_next(self, pto_engaged):
         # Choose target based on PTO state
-        target = random.randint(900, 1300) if pto_engaged else random.randint(1200, 3200)
+        target = random.randint(900, 1300) if pto_engaged else random.randint(1200, 3200) # Adjust RPM range based on PTO state
         step = random.randint(25, 60)  # How quickly RPM can change per second
 
-        # Smooth toward target
+        # Smooth RPM change towards target range
         if abs(self.current_rpm - target) > step:
             self.current_rpm += step if target > self.current_rpm else -step
         else:
             self.current_rpm = target
 
         scaled = int(self.current_rpm * 4) # Match the hex_to_rpm scaling (÷4)
-        return f"{scaled:04X}" + "0000" # 4-digit hex + 4 zeroes
-
+        return f"{scaled:04X}" + "0000" # 4-digit hex + 4 zeroes 
 
 # PTO state machine for realistic engagement patterns
 class PTOStateMachine:
     def __init__(self):
         self.pto_on = False # Initial state
-        self.timer = random.randint(1200, 1800)  # Start with PTO off, wait 20-30 minutes
+        self.timer = random.randint(1200, 1800)  # Start with PTO off, wait 20-30 minutes to engage
 
     def next_state(self):
         if self.timer <= 0: # Time to change state
@@ -36,10 +35,10 @@ class PTOStateMachine:
         return self.pto_on
 
     def simulate_pto_hex(self):
-        prefix = "01" if self.pto_on else "00" # PTO engaged state format
-        return prefix + ''.join(random.choices('0123456789ABCDEF', k=6)), self.pto_on # Pad to 8 characters
+        prefix = "01" if self.pto_on else "00" # PTO engaged vs. not engaged format
+        return prefix + ''.join(random.choices('0123456789ABCDEF', k=6)), self.pto_on # Pad to 8 chars
 
-# Simulate a generic fault code in hex format
+# Simulate a generic fault code in hex format based on SAE J1939 specification
 VALID_SPNS = [100, 190, 723, 84, 91, 108, 639, 110, 111]
 RELEVANT_FMIS = {
     100: [0, 1, 4],
@@ -61,7 +60,7 @@ class FaultGenerator:
     def simulate_fault_hex(self):
         spn = random.choice(VALID_SPNS)  # SPN (Suspect Parameter Number)
         fmi = random.choice(RELEVANT_FMIS[spn])    # FMI (Failure Mode Identifier)
-        return f"{spn:04X}{fmi:02X}00"   # SPN(4 hex) + FMI(2 hex) + pad to 8 characters
+        return f"{spn:04X}{fmi:02X}00"   # SPN(4 hex) + FMI(2 hex) + pad to 8 chars
 
     def maybe_emit_fault(self):
         if self.timer <= 0:
@@ -78,10 +77,12 @@ class FaultGenerator:
             return self.simulate_fault_hex() # Emit fault code
         return None
 
-# Generate 3600 rows of telemetry data, equivalent to 1 hour
+# Generate 3600 rows (equivalent 1 hour) of telemetry data
 def generate_data(file="data/telemetry.csv", rows=3600):
-    can_ids = ['0x0CF00400', '0x18FEF100', '0x0CFE6CEE'] # Example CAN IDs
-    timestamp = datetime.now(timezone.utc) # Start from current UTC time with explicit timezone awareness
+    can_ids = ['0x0CF00400', '0x18FEF100', '0x0CFE6CEE'] # Example CAN IDs from standardized J1939 PGNs
+    timestamp = datetime.now(timezone.utc) # Start from current UTC time
+    
+    # Name assignment for each class
     pto_state = PTOStateMachine()
     rpm_gen = RPMGenerator()
     fault_gen = FaultGenerator()
@@ -93,7 +94,7 @@ def generate_data(file="data/telemetry.csv", rows=3600):
         for i in range(rows):
             ts = timestamp.isoformat() # ISO format and UTC timezone
             
-            # Simulate PTO data first so RPM will correlate 
+            # Simulate PTO data first so RPM will correlate as intended
             pto_engaged = pto_state.next_state()
             pto_data, _ = pto_state.simulate_pto_hex()
             writer.writerow([ts, '0x18FEF100', pto_data])
@@ -102,7 +103,7 @@ def generate_data(file="data/telemetry.csv", rows=3600):
             rpm_data = rpm_gen.get_next(pto_engaged)
             writer.writerow([ts, '0x0CF00400', rpm_data])
 
-            # Simulate generic error/fault code data
+            # Simulate error/fault code data
             fault_data = fault_gen.maybe_emit_fault()
             if fault_data:
                 writer.writerow([ts, '0x0CFE6CEE', fault_data])

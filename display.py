@@ -3,11 +3,11 @@ import os
 from analyze import get_rpm_data # Import rpm function from analyze.py
 from analyze import get_pto_data # Import pto function from analyze.py
 
-# Function to ensure the display folder exists
+# Ensure the display folder exists
 def ensure_display_folder():
     os.makedirs("display", exist_ok=True)
 
-# Function to plot RPM data
+# Plot RPM data
 def plot_rpm():
     ensure_display_folder()
     df = get_rpm_data('db/telemetry.db')
@@ -20,6 +20,7 @@ def plot_rpm():
     plt.savefig("display/rpm_plot.png")
     plt.show()
 
+# Plot PTO data
 def plot_pto():
     ensure_display_folder()
     df = get_pto_data('db/telemetry.db')

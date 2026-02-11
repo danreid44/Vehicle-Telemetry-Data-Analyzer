@@ -1,20 +1,20 @@
 import sqlite3 
 import pandas as pd
 
-# Function to fetch RPM data from SQLite database
-# Assume: first 4 hex chars as RPM
+# Query RPM data from SQLite database and return dataframe
+# Assume: first 4 hex chars as RPM per simulator design
 def get_rpm_data(db_file): 
     def hex_to_rpm(data):
         return int(data[:4], 16) / 4  # Simulated formula
 
     conn = sqlite3.connect(db_file) # Connect to SQLite database
-    df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x0CF00400'", conn) # Fetch data from telemetry table
+    df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x0CF00400'", conn) # Fetch RPM data by CAN ID
     conn.close() # Close connection
 
-    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, format='mixed') # Convert timestamp to datetime
+    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, format='mixed') # Convert timestamp to datetime format
     df['rpm'] = df['data'].apply(hex_to_rpm) # Convert hex data to RPM
     return df
-# Function to calculate RPM statistics from the fetched data
+# Calculate RPM stats from the fetched data
 def get_rpm_stats(db_file):
     df = get_rpm_data(db_file)
     return {
@@ -23,21 +23,20 @@ def get_rpm_stats(db_file):
         "avg_rpm": round(df['rpm'].mean(), 2),
     }
 
-
-# Function to fetch PTO data from SQLite database
-# Assume: first byte represents PTO status: 00 = Off, 01 = On
+# Query PTO data from SQLite database and return dataframe
+# Assume: first byte represents PTO status (00 = Off, 01 = On) per simulator design
 def get_pto_data(db_file):
     def is_pto_on(data):
         return data[:2] == "01"  # check if first byte == 0x01
 
     conn = sqlite3.connect(db_file) # Connect to SQLite database
-    df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x18FEF100'", conn) # Fetch PTO data
+    df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x18FEF100'", conn) # Fetch PTO data by CAN ID
     conn.close()
 
-    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, format='mixed') # Convert timestamp to datetime
+    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, format='mixed') # Convert timestamp to datetime format
     df['pto_on'] = df['data'].apply(is_pto_on) # Convert hex data to PTO status
     return df
-# Function to calculate PTO statistics from the fetched data
+# Calculate PTO stats from the fetched data
 def get_pto_stats(db_file):
     df = get_pto_data(db_file)
     # Calculate PTO usage frequency
@@ -54,8 +53,8 @@ def get_pto_stats(db_file):
         "pto_duration_min": round(engaged_duration_sec / 60, 2)
     }
 
-# Function to decode fault codes from hex string
-# Assume: first 4 hex chars as SPN, next 2 hex chars as FMI
+# Decode fault codes from hex string
+# Assume: first 4 hex chars as SPN, next 2 hex chars as FMI per simulator design
 def decode_fault(hex_str):
         try:
             if not isinstance(hex_str, str) or len(hex_str) < 6: # Validate input
@@ -66,7 +65,7 @@ def decode_fault(hex_str):
         except:
             return None, None
 
-# Function to classify severity based on FMI
+# Classify fault severity based on FMI
 def classify_severity(fmi):
         if fmi in [0, 1]:
             return "Critical"
@@ -75,8 +74,7 @@ def classify_severity(fmi):
         else:
             return "Info"
         
-
-# Function to get fault codes from SQLite database
+# Query Fault data from SQLite database and return dataframe
 def get_fault_data(db_file, decoder_path="data/spn_fmi_decoder.csv"):
     conn = sqlite3.connect(db_file)
     df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x0CFE6CEE'", conn) # Fetch fault data
@@ -88,7 +86,7 @@ def get_fault_data(db_file, decoder_path="data/spn_fmi_decoder.csv"):
         return pd.DataFrame(columns=["timestamp", "spn", "fmi", "description", "severity"])
 
     # Filter out invalid data
-    df = df[df['data'].apply(lambda x: isinstance(x, str) and len(x) >= 6)] 
+    df = df[df['data'].apply(lambda x: isinstance(x, str) and len(x) >= 6)]
 
     # Split data into SPN and FMI columns
     df[['spn', 'fmi']] = df['data'].apply(lambda d: pd.Series(decode_fault(d))) 
@@ -99,9 +97,9 @@ def get_fault_data(db_file, decoder_path="data/spn_fmi_decoder.csv"):
     df = df.merge(decoder, on=["spn", "fmi"], how="left")
     df['description'] = df['description'].fillna("Unknown SPN/FMI")
     df['severity'] = df['fmi'].apply(classify_severity)
-    
     return df
 
+# Mean time between faults calculation
 def get_mtbf(df):
     if df.empty or 'timestamp' not in df.columns:
         return None  # No data to analyze
@@ -120,8 +118,7 @@ def get_mtbf(df):
     mtbf = sum(deltas) / len(deltas)  # Avg seconds between faults
     return mtbf
 
-
-# Function to get top N fault codes
+# Fetch top N fault codes (10 in this case)
 def get_fault_frequency(df_fault, top_n=10):
     def wrap_text(text, width=30):
         # Insert line break at nearest space before width
@@ -140,7 +137,7 @@ def get_fault_frequency(df_fault, top_n=10):
     )
     return freq.reset_index().rename(columns={0: "count"})
 
-# Function to calculate fault statistics from the fetched data
+# Calculate fault stats from the fetched data
 def get_fault_stats(df_fault):
     if df_fault.empty:
         return {
@@ -166,22 +163,3 @@ def get_fault_stats(df_fault):
         "info_count": info_count,
         "severity_counts": severity_counts
     }
-
-# Function to detect RPM anomalies based on rules
-def detect_rpm_anomalies(df):
-    anomalies = []  # List to store detected anomalies
-
-    for i in range(1, len(df)):
-        rpm_now = df.iloc[i]['rpm']
-        rpm_prev = df.iloc[i-2]['rpm']
-        pto_on = df.iloc[i]['pto_on']
-
-        # Rule: RPM > 2000 while PTO is engaged
-        if pto_on and rpm_now > 2000:
-            anomalies.append((df.iloc[i]['timestamp'], "High RPM during PTO"))
-
-        # Rule: Sudden RPM jump (eg. > 110 RPM change in 2 seconds)
-        if abs(rpm_now - rpm_prev) > 110:
-            anomalies.append((df.iloc[i]['timestamp'], "Sudden RPM change"))
-
-    return anomalies

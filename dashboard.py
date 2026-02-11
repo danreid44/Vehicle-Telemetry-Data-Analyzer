@@ -24,12 +24,10 @@ from streamlit_autorefresh import st_autorefresh
 
 # Refresh the dashboard every 5 seconds
 live_refresh = st.sidebar.checkbox("Live Refresh (every 5s)", value=True)
-
 if live_refresh:
     st_autorefresh(interval=5000, key="dashboard_refresh")
 
-
-# Load data
+# Load SQLite data
 DB_PATH = "db/telemetry.db"
 df_rpm = get_rpm_data(DB_PATH)
 df_pto = get_pto_data(DB_PATH)
@@ -40,8 +38,7 @@ fault_freq = get_fault_frequency(df_fault)
 fault_stats = get_fault_stats(df_fault)
 mtbf = get_mtbf(df_fault)
 
-
-# Function to highlight severity in fault codes
+# Function to color code fault codes based on severity
 def highlight_severity(val):
     color = {
         "Critical": "red",
@@ -49,7 +46,6 @@ def highlight_severity(val):
         "Info": "green",
     }.get(val, "black")  # Fallback color
     return f"color: {color}; font-weight: bold;"
-
 
 st.title("Vehicle Telemetry Dashboard")
 st.markdown("Analyze simulated J1939 vehicle data: engine RPM, PTO activation, fault codes, and more.")
@@ -110,7 +106,7 @@ with tab1:
     with st.expander("**Show Raw RPM Data**"):
         st.dataframe(df_rpm)
 
-    # Download RPM Data as CSV
+    # Download RPM Data as CSV button
     st.download_button(
         label="Download RPM Data as CSV",
         data=df_rpm.to_csv(index=False),
@@ -132,7 +128,7 @@ with tab2:
     with st.expander("**Show Raw PTO Data**"):
         st.dataframe(df_pto)
 
-    # Download PTO Data as CSV
+    # Download PTO Data as CSV button
     st.download_button(
         label="Download PTO Data as CSV",
         data=df_pto.to_csv(index=False),
