@@ -62,7 +62,7 @@ def decode_fault(hex_str):
             spn = int(hex_str[:4], 16) # Convert first 4 hex chars to SPN
             fmi = int(hex_str[4:6], 16) # Convert next 2 hex chars to FMI
             return spn, fmi
-        except:
+        except (ValueError, TypeError):
             return None, None
 
 # Classify fault severity based on FMI

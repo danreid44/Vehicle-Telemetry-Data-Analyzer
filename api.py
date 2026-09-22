@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import sqlite3
 import pandas as pd
 from datetime import datetime
+from analyze import decode_fault
 
 app = Flask(__name__) # Flask app instance
 DB_PATH = "db/telemetry.db" # Path to SQLite database file
@@ -50,18 +51,12 @@ def get_pto_data():
 # Route to get fault telemetry data
 @app.route("/api/faults", methods=["GET"])
 def get_fault_data():
-    def decode_fault(hex_str):
-        try:
-            spn = int(hex_str[:4], 16) # First 4 hex chars to SPN
-            fmi = int(hex_str[4:6], 16) # Next 2 hex chars to FMI
-            return spn, fmi
-        except:
-            return None, None
+
     conn = sqlite3.connect(DB_PATH)
     df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x0CFE6CEE'", conn) # Fetch fault data based on CAN ID
     conn.close()
     df['timestamp'] = pd.to_datetime(df['timestamp'])
-    df[['spn', 'fmi']] = df['data'].apply(lambda d: pd.Series(decode_fault(d))) 
+    df[['spn', 'fmi']] = df['data'].apply(lambda d: pd.Series(decode_fault(d))) # decode_fault imported from analyze.py
     df = df.dropna()
     return jsonify(df[['timestamp', 'spn', 'fmi']].to_dict(orient="records"))
 
