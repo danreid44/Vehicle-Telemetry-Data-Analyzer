@@ -27,7 +27,7 @@ def load_to_db(csv_file, db_file):
                         (row['timestamp'], row['can_id'], row['data'])) # Insert data into table
 
     conn.commit()
-    conn.close() # Commit changes and close connection
+    conn.close()
 
 if __name__ == "__main__":
     load_to_db('data/telemetry.csv', 'db/telemetry.db') 

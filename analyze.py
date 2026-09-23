@@ -63,23 +63,23 @@ def get_pto_stats(db_file):
 # Decode fault codes from hex string
 # Assume: first 4 hex chars as SPN, next 2 hex chars as FMI per simulator design
 def decode_fault(hex_str):
-        try:
-            if not isinstance(hex_str, str) or len(hex_str) < 6: # Validate input
-                return None, None
-            spn = int(hex_str[:4], 16) # Convert first 4 hex chars to SPN
-            fmi = int(hex_str[4:6], 16) # Convert next 2 hex chars to FMI
-            return spn, fmi
-        except (ValueError, TypeError):
+    try:
+        if not isinstance(hex_str, str) or len(hex_str) < 6: # Validate input
             return None, None
+        spn = int(hex_str[:4], 16) # Convert first 4 hex chars to SPN
+        fmi = int(hex_str[4:6], 16) # Convert next 2 hex chars to FMI
+        return spn, fmi
+    except (ValueError, TypeError):
+        return None, None
 
 # Classify fault severity based on FMI
 def classify_severity(fmi):
-        if fmi in [0, 1]:
-            return "Critical"
-        elif fmi in [2, 3, 4]:
-            return "Warning"
-        else:
-            return "Info"
+    if fmi in [0, 1]:
+        return "Critical"
+    elif fmi in [2, 3, 4]:
+        return "Warning"
+    else:
+        return "Info"
         
 # Query Fault data from SQLite database and return dataframe
 def get_fault_data(db_file, decoder_path="data/spn_fmi_decoder.csv"):
