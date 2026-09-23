@@ -22,15 +22,17 @@ class RPMGenerator:
         return f"{scaled:04X}" + "0000" # 4-digit hex + 4 zeroes 
 
 # PTO state machine for realistic engagement patterns
+# Timer windows are parameterized (in seconds) so callers like simulate_loop.py
+# can shorten them for a faster live demo without duplicating this class.
 class PTOStateMachine:
-    def __init__(self):
+    def __init__(self, initial_wait_range=(1200, 1800), off_wait_range=(1200, 1800), on_wait_range=(60, 180)):
         self.pto_on = False # Initial state
-        self.timer = random.randint(1200, 1800)  # Start with PTO off, wait 20-30 minutes to engage
+        self.off_wait_range = off_wait_range  # Start with PTO off, wait specified time before first engaging
 
     def next_state(self):
         if self.timer <= 0: # Time to change state
             self.pto_on = not self.pto_on # Toggle PTO state
-            self.timer = random.randint(60, 180) if self.pto_on else random.randint(1200, 1800) # Reset timer
+            self.timer = random.randint(*self.on_wait_range) if self.pto_on else random.randint(*self.off_wait_range) # Reset timer
         self.timer -= 1 # Decrement timer
         return self.pto_on
 
@@ -52,10 +54,15 @@ RELEVANT_FMIS = {
     108: [0, 1]}
 
 # Simulate fault codes with SPN and FMI in hex format
+# Timer windows are parameterized (in seconds) so callers like simulate_loop.py
+# can shorten them for a faster live demo without duplicating this class.
 class FaultGenerator:
-    def __init__(self):
+    def __init__(self, initial_wait_range=(300, 2400), active_duration_range=(5, 30), inactive_wait_range=(600, 1800)):
         self.active = False
-        self.timer = random.randint(300, 2400)  # Initial fault timer (5-40 minutes)
+        self.timer = random.randint(*initial_wait_range) # Initial fault timer
+        self.active_duration_range = active_duration_range # How long an emitted fault stays active
+        self.inactive_wait_range = inactive_wait_range # How long to wait before the next fault
+
 
     def simulate_fault_hex(self):
         spn = random.choice(VALID_SPNS)  # SPN (Suspect Parameter Number)
@@ -66,10 +73,10 @@ class FaultGenerator:
         if self.timer <= 0:
             if not self.active:
                 self.active = True
-                self.timer = random.randint(5, 30)  # Emit fault for 5-30 seconds
+                self.timer = random.randint(*self.active_duration_range)  # Emit fault for specified time period
             else:
                 self.active = False
-                self.timer = random.randint(600, 1800)  # Reset timer for next fault in 10-30 minutes
+                self.timer =  random.randint(*self.inactive_wait_range)   # Reset timer for next fault
         else:
             self.timer -= 1 # Decrement timer
 
