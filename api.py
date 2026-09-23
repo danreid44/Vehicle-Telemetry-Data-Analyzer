@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 import sqlite3
 import pandas as pd
 from datetime import datetime
-from analyze import decode_fault
+from analyze import decode_fault, hex_to_rpm, is_pto_on
 
 app = Flask(__name__) # Flask app instance
 DB_PATH = "db/telemetry.db" # Path to SQLite database file
@@ -35,7 +35,7 @@ def get_rpm_data():
     df = pd.read_sql_query("SELECT id, timestamp, data FROM telemetry WHERE can_id='0x0CF00400'", conn) # Fetch RPM data based on CAN ID
     conn.close()
     df['timestamp'] = pd.to_datetime(df['timestamp'])
-    df['rpm'] = df['data'].apply(lambda d: int(d[:4], 16) / 4) # Convert hex data to RPM
+    df['rpm'] = df['data'].apply(hex_to_rpm) # Convert hex data to RPM, hex_to_rpm imported from analyze.py
     return jsonify(df.to_dict(orient="records"))
 
 # Route to get PTO telemetry data
@@ -45,7 +45,7 @@ def get_pto_data():
     df = pd.read_sql_query("SELECT id, timestamp, data FROM telemetry WHERE can_id='0x18FEF100'", conn) # Fetch PTO data based on CAN ID
     conn.close()
     df['timestamp'] = pd.to_datetime(df['timestamp'])
-    df['pto_on'] = df['data'].apply(lambda d: d[:2] == "01") # Convert hex data to PTO status
+    df['pto_on'] = df['data'].apply(is_pto_on) # Convert hex data to PTO status, is_pto_on imported from analyze.py
     return jsonify(df.to_dict(orient="records"))
 
 # Route to get fault telemetry data

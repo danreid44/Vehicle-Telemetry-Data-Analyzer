@@ -1,12 +1,15 @@
 import sqlite3 
 import pandas as pd
 
+
+# Decode RPM from hex string (first 4 hex chars per simulator design)
+# Shared by analyze.py's get_rpm_data function and by api.py's /api/rpm route
+def hex_to_rpm(data):
+    return int(data[:4], 16) * 0.125  # Simulated formula replicating industry standard 0.125 rpm/bit resolution
+
 # Query RPM data from SQLite database and return dataframe
 # Assume: first 4 hex chars as RPM per simulator design
 def get_rpm_data(db_file): 
-    def hex_to_rpm(data):
-        return int(data[:4], 16) / 4  # Simulated formula
-
     conn = sqlite3.connect(db_file) # Connect to SQLite database
     df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x0CF00400'", conn) # Fetch RPM data by CAN ID
     conn.close() # Close connection
@@ -14,6 +17,7 @@ def get_rpm_data(db_file):
     df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, format='mixed') # Convert timestamp to datetime format
     df['rpm'] = df['data'].apply(hex_to_rpm) # Convert hex data to RPM
     return df
+
 # Calculate RPM stats from the fetched data
 def get_rpm_stats(db_file):
     df = get_rpm_data(db_file)
@@ -23,12 +27,14 @@ def get_rpm_stats(db_file):
         "avg_rpm": round(df['rpm'].mean(), 2),
     }
 
+# Decode PTO status from hex string (first byte: 00 = Off, 01 = On per simulator design)
+# Shared by analyze.py's get_pto_data function and by api.py's /api/pto route
+def is_pto_on(data):
+    return data[:2] == "01"  # check if first byte == 0x01
+
 # Query PTO data from SQLite database and return dataframe
 # Assume: first byte represents PTO status (00 = Off, 01 = On) per simulator design
 def get_pto_data(db_file):
-    def is_pto_on(data):
-        return data[:2] == "01"  # check if first byte == 0x01
-
     conn = sqlite3.connect(db_file) # Connect to SQLite database
     df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x18FEF100'", conn) # Fetch PTO data by CAN ID
     conn.close()
@@ -36,6 +42,7 @@ def get_pto_data(db_file):
     df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, format='mixed') # Convert timestamp to datetime format
     df['pto_on'] = df['data'].apply(is_pto_on) # Convert hex data to PTO status
     return df
+
 # Calculate PTO stats from the fetched data
 def get_pto_stats(db_file):
     df = get_pto_data(db_file)

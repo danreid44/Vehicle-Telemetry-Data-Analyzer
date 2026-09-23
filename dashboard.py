@@ -38,14 +38,28 @@ fault_freq = get_fault_frequency(df_fault)
 fault_stats = get_fault_stats(df_fault)
 mtbf = get_mtbf(df_fault)
 
+
+# Dictionary to color code fault codes based on severity
+SEVERITY_COLORS = {
+    "Critical": "red",
+    "Warning": "orange",
+    "Info": "green",
+}
+
 # Function to color code fault codes based on severity
 def highlight_severity(val):
-    color = {
-        "Critical": "red",
-        "Warning": "orange",
-        "Info": "green",
-    }.get(val, "black")  # Fallback color
+    color = SEVERITY_COLORS.get(val, "white") # fallback color
     return f"color: {color}; font-weight: bold;"
+
+# Helper function to avoid repeating the same download_button structure for each dataset
+def csv_download_button(label, df, file_name):
+    st.download_button(
+        label=label,
+        data=df.to_csv(index=False),
+        file_name=file_name,
+        mime="text/csv"
+    )
+
 
 st.title("Vehicle Telemetry Dashboard")
 st.markdown("Analyze simulated J1939 vehicle data: engine RPM, PTO activation, fault codes, and more.")
@@ -107,12 +121,7 @@ with tab1:
         st.dataframe(df_rpm)
 
     # Download RPM Data as CSV button
-    st.download_button(
-        label="Download RPM Data as CSV",
-        data=df_rpm.to_csv(index=False),
-        file_name="rpm_data.csv",
-        mime="text/csv"
-    )
+    csv_download_button("Download RPM Data as CSV", df_rpm, "rpm_data.csv")
 
 # PTO Activation Tab
 with tab2:
@@ -129,12 +138,7 @@ with tab2:
         st.dataframe(df_pto)
 
     # Download PTO Data as CSV button
-    st.download_button(
-        label="Download PTO Data as CSV",
-        data=df_pto.to_csv(index=False),
-        file_name="pto_data.csv",
-        mime="text/csv"
-    )
+    csv_download_button("Download PTO Data as CSV", df_pto, "pto_data.csv")
 
 # Fault Codes Tab
 with tab3:
@@ -188,12 +192,7 @@ with tab3:
         st.dataframe(styled_df, use_container_width=True)
     
     # Download Fault Codes as CSV
-    st.download_button(
-        label="Download Fault Codes as CSV",
-        data=df_fault.to_csv(index=False),
-        file_name="fault_data.csv",
-        mime="text/csv"
-    )
+    csv_download_button("Download Fault Codes as CSV", df_fault, "fault_data.csv")
     
     # List number of faults and overview of fault codes
     st.markdown("Fault codes are represented by SPN (Suspect Parameter Number) and FMI (Failure Mode Identifier).")

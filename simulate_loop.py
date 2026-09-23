@@ -19,7 +19,7 @@ class RPMGenerator:
         else:
             self.current_rpm = target
 
-        scaled = int(self.current_rpm * 4) # Match the hex_to_rpm scaling (÷4)
+        scaled = int(self.current_rpm * 8) # Match the hex_to_rpm scaling (÷8)
         return f"{scaled:04X}" + "0000" # 4-digit hex + 4 zeroes
 
 # PTO state machine for realistic engagement patterns
