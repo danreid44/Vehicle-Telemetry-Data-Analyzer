@@ -94,7 +94,7 @@ def get_fault_data(db_file, decoder_path=DECODER_PATH):
         return pd.DataFrame(columns=["timestamp", "spn", "fmi", "description", "severity"])
 
     # Filter out invalid data
-    df = df[df['data'].apply(lambda x: isinstance(x, str) and len(x) >= 6)]
+    df = df[df['data'].apply(lambda x: isinstance(x, str) and len(x) >= 6)].copy()
 
     # Split data into SPN and FMI columns
     df[['spn', 'fmi']] = df['data'].apply(lambda d: pd.Series(decode_fault(d))) 
@@ -149,9 +149,12 @@ def get_fault_frequency(df_fault, top_n=10):
 def get_fault_stats(df_fault):
     if df_fault.empty:
         return {
+            "total_faults": 0,
             "most_recent": None,
             "last_fault_time": None,
             "critical_count": 0,
+            "warning_count": 0,
+            "info_count": 0,
             "severity_counts": {}
         }
 

@@ -10,4 +10,3 @@ CAN_ID_FAULT = '0x0CFE6CEE'
 CSV_PATH = "data/telemetry.csv"
 DB_PATH = "db/telemetry.db"
 DECODER_PATH = "data/spn_fmi_decoder.csv"
- 
