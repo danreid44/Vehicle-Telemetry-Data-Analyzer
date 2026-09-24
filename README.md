@@ -147,6 +147,10 @@ python api.py # Launch API routes and Flask app on http://127.0.0.1:5000
 
 ## 4. Live Simulated Data Demo ##
 ```bash
+# On Windows (PowerShell): 
+
+
+# On macOS / Linux
 ./clear.sh  # Clear existing data
 ./live_demo.sh  # Run simulation loop data script and dashboard
 ```
