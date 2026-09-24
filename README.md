@@ -52,7 +52,7 @@ For a quick live demo, `simulate_loop.py` runs the same three generator classes 
 
 ## Design Decisions ##
 
-A few of the design choices are important to explain;
+A few of the design choices are important to explain:
 
 - The RPM field is encoded and decoded using a 0.125 rpm/bit resolution, matching the real SAE J1939 PGN 61444 (Electronic Engine Controller 1) specification, rather than an arbitrary scale factor, so the simulated data behaves the way a real J1939 analyzer's output would. Fault codes follow the same SPN/FMI structure used in real heavy-duty diagnostics: the first four hex characters of a fault payload are the Suspect Parameter Number and the next two are the Failure Mode Identifier, which is then mapped to a severity level.
 
