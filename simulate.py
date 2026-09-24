@@ -27,9 +27,10 @@ class RPMGenerator:
 # can shorten them for a faster live demo without duplicating this class.
 class PTOStateMachine:
     def __init__(self, initial_wait_range=(1200, 1800), off_wait_range=(1200, 1800), on_wait_range=(60, 180)):
-        self.pto_on = False # Initial state
+        self.timer = random.randint(*initial_wait_range) # Wait before the first state change
         self.off_wait_range = off_wait_range  # Start with PTO off, wait specified time before first engaging
-
+        self.on_wait_range = on_wait_range  # Keep PTO engaged for the specified time
+        
     def next_state(self):
         if self.timer <= 0: # Time to change state
             self.pto_on = not self.pto_on # Toggle PTO state
