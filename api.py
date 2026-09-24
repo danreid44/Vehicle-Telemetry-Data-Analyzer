@@ -2,10 +2,11 @@ from flask import Flask, request, jsonify
 import sqlite3
 import pandas as pd
 from datetime import datetime
+
 from analyze import decode_fault, hex_to_rpm, is_pto_on
+from constants import CAN_ID_RPM, CAN_ID_PTO, CAN_ID_FAULT, DB_PATH
 
 app = Flask(__name__) # Flask app instance
-DB_PATH = "db/telemetry.db" # Path to SQLite database file
 
 # Root API route
 @app.route("/", methods=["GET"])
@@ -32,7 +33,7 @@ def get_db_connection():
 @app.route("/api/rpm", methods=["GET"])
 def get_rpm_data():
     conn = get_db_connection()
-    df = pd.read_sql_query("SELECT id, timestamp, data FROM telemetry WHERE can_id='0x0CF00400'", conn) # Fetch RPM data based on CAN ID
+    df = pd.read_sql_query(f"SELECT id, timestamp, data FROM telemetry WHERE can_id='{CAN_ID_RPM}'", conn) # Fetch RPM data based on CAN ID
     conn.close()
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     df['rpm'] = df['data'].apply(hex_to_rpm) # Convert hex data to RPM, hex_to_rpm imported from analyze.py
@@ -42,7 +43,7 @@ def get_rpm_data():
 @app.route("/api/pto", methods=["GET"])
 def get_pto_data():
     conn = get_db_connection()
-    df = pd.read_sql_query("SELECT id, timestamp, data FROM telemetry WHERE can_id='0x18FEF100'", conn) # Fetch PTO data based on CAN ID
+    df = pd.read_sql_query(f"SELECT id, timestamp, data FROM telemetry WHERE can_id='{CAN_ID_PTO}'", conn) # Fetch PTO data based on CAN ID
     conn.close()
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     df['pto_on'] = df['data'].apply(is_pto_on) # Convert hex data to PTO status, is_pto_on imported from analyze.py
@@ -53,7 +54,7 @@ def get_pto_data():
 def get_fault_data():
 
     conn = sqlite3.connect(DB_PATH)
-    df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x0CFE6CEE'", conn) # Fetch fault data based on CAN ID
+    df = pd.read_sql_query(f"SELECT timestamp, data FROM telemetry WHERE can_id='{CAN_ID_FAULT}'", conn) # Fetch fault data based on CAN ID
     conn.close()
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     df[['spn', 'fmi']] = df['data'].apply(lambda d: pd.Series(decode_fault(d))) # decode_fault imported from analyze.py

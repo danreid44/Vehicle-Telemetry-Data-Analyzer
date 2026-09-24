@@ -1,5 +1,6 @@
 import sqlite3 
 import pandas as pd
+from constants import CAN_ID_RPM, CAN_ID_PTO, CAN_ID_FAULT, DECODER_PATH
 
 
 # Decode RPM from hex string (first 4 hex chars per simulator design)
@@ -11,7 +12,7 @@ def hex_to_rpm(data):
 # Assume: first 4 hex chars as RPM per simulator design
 def get_rpm_data(db_file): 
     conn = sqlite3.connect(db_file) # Connect to SQLite database
-    df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x0CF00400'", conn) # Fetch RPM data by CAN ID
+    df = pd.read_sql_query(f"SELECT timestamp, data FROM telemetry WHERE can_id='{CAN_ID_RPM}'", conn) # Fetch RPM data by CAN ID
     conn.close() # Close connection
 
     df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, format='mixed') # Convert timestamp to datetime format
@@ -36,7 +37,7 @@ def is_pto_on(data):
 # Assume: first byte represents PTO status (00 = Off, 01 = On) per simulator design
 def get_pto_data(db_file):
     conn = sqlite3.connect(db_file) # Connect to SQLite database
-    df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x18FEF100'", conn) # Fetch PTO data by CAN ID
+    df = pd.read_sql_query(f"SELECT timestamp, data FROM telemetry WHERE can_id='{CAN_ID_PTO}'", conn) # Fetch PTO data by CAN ID
     conn.close()
 
     df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, format='mixed') # Convert timestamp to datetime format
@@ -82,9 +83,9 @@ def classify_severity(fmi):
         return "Info"
         
 # Query Fault data from SQLite database and return dataframe
-def get_fault_data(db_file, decoder_path="data/spn_fmi_decoder.csv"):
+def get_fault_data(db_file, decoder_path=DECODER_PATH):
     conn = sqlite3.connect(db_file)
-    df = pd.read_sql_query("SELECT timestamp, data FROM telemetry WHERE can_id='0x0CFE6CEE'", conn) # Fetch fault data
+    df = pd.read_sql_query(f"SELECT timestamp, data FROM telemetry WHERE can_id='{CAN_ID_FAULT}'", conn) # Fetch fault data
     conn.close()
 
     df['timestamp'] = pd.to_datetime(df['timestamp']) # Convert timestamp to datetime

@@ -4,9 +4,11 @@ import time
 from datetime import datetime, timezone
 
 from simulate import RPMGenerator, PTOStateMachine, FaultGenerator
+from constants import CAN_ID_RPM, CAN_ID_PTO, CAN_ID_FAULT, DB_PATH
+
 
 # Ensure the database and telemetry table exist (main.py not used with this loop simulator)
-def ensure_db(db_path="db/telemetry.db"):
+def ensure_db(db_path=DB_PATH):
     conn = sqlite3.connect(db_path) # Connect to SQLite database
     cur = conn.cursor() # Create a cursor object to execute SQL commands
     cur.execute('''
@@ -58,12 +60,12 @@ def simulate_loop(interval=1.0):
             # Insert data into the database
             # CAN IDs from standardized J1939 PGNs, also matching the simulate.py script
             cur.execute("INSERT INTO telemetry (timestamp, can_id, data) VALUES (?, ?, ?)",
-                        (ts, '0x18FEF100', pto_data)) 
+                        (ts, CAN_ID_PTO, pto_data)) 
             cur.execute("INSERT INTO telemetry (timestamp, can_id, data) VALUES (?, ?, ?)",
-                        (ts, '0x0CF00400', rpm_data)) 
+                        (ts, CAN_ID_RPM, rpm_data)) 
             if fault_data:
                 cur.execute("INSERT INTO telemetry (timestamp, can_id, data) VALUES (?, ?, ?)",
-                            (ts, '0x0CFE6CEE', fault_data))
+                            (ts, CAN_ID_FAULT, fault_data))
 
             conn.commit()
 

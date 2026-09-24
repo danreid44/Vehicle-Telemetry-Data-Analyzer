@@ -19,6 +19,8 @@ from analyze import (
     get_mtbf
 ) # Importing functions from analyze.py
 
+from constants import DB_PATH
+
 # Import Auto Refresh
 from streamlit_autorefresh import st_autorefresh
 
@@ -28,7 +30,6 @@ if live_refresh:
     st_autorefresh(interval=5000, key="dashboard_refresh")
 
 # Load SQLite data
-DB_PATH = "db/telemetry.db"
 df_rpm = get_rpm_data(DB_PATH)
 df_pto = get_pto_data(DB_PATH)
 rpm_stats = get_rpm_stats(DB_PATH)

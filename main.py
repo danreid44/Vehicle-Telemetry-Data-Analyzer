@@ -2,6 +2,8 @@ import sqlite3
 import csv
 import os
 
+from constants import CSV_PATH, DB_PATH
+
 # Function to load telemetry data from CSV to SQLite database
 def load_to_db(csv_file, db_file):
     db_dir = os.path.dirname(db_file)
@@ -30,4 +32,4 @@ def load_to_db(csv_file, db_file):
     conn.close()
 
 if __name__ == "__main__":
-    load_to_db('data/telemetry.csv', 'db/telemetry.db') 
+    load_to_db(CSV_PATH, DB_PATH) 

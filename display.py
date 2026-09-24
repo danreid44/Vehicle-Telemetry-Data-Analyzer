@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 import os
+
 from analyze import get_rpm_data # Import rpm function from analyze.py
 from analyze import get_pto_data # Import pto function from analyze.py
+from constants import DB_PATH
 
 # Ensure the display folder exists
 def ensure_display_folder():
@@ -10,7 +12,7 @@ def ensure_display_folder():
 # Plot RPM data
 def plot_rpm():
     ensure_display_folder()
-    df = get_rpm_data('db/telemetry.db')
+    df = get_rpm_data(DB_PATH)
     plt.plot(df['timestamp'], df['rpm'])
     plt.xlabel('Timestamp')
     plt.ylabel('RPM')
@@ -23,7 +25,7 @@ def plot_rpm():
 # Plot PTO data
 def plot_pto():
     ensure_display_folder()
-    df = get_pto_data('db/telemetry.db')
+    df = get_pto_data(DB_PATH)
     plt.figure()
     plt.plot(df['timestamp'], df['pto_on'].astype(int), label="PTO")
     plt.xlabel('Timestamp')

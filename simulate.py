@@ -1,6 +1,7 @@
 import csv
 import random
 from datetime import datetime, timezone, timedelta
+from constants import CAN_ID_RPM, CAN_ID_PTO, CAN_ID_FAULT, CSV_PATH
 
 # Generate realistic RPM hex data based on PTO state 
 class RPMGenerator:
@@ -85,8 +86,7 @@ class FaultGenerator:
         return None
 
 # Generate 3600 rows (equivalent 1 hour) of telemetry data
-def generate_data(file="data/telemetry.csv", rows=3600):
-    can_ids = ['0x0CF00400', '0x18FEF100', '0x0CFE6CEE'] # Example CAN IDs from standardized J1939 PGNs
+def generate_data(file=CSV_PATH, rows=3600):
     timestamp = datetime.now(timezone.utc) # Start from current UTC time
     
     # Name assignment for each class
@@ -104,16 +104,16 @@ def generate_data(file="data/telemetry.csv", rows=3600):
             # Simulate PTO data first so RPM will correlate as intended
             pto_engaged = pto_state.next_state()
             pto_data, _ = pto_state.simulate_pto_hex()
-            writer.writerow([ts, '0x18FEF100', pto_data])
+            writer.writerow([ts, CAN_ID_PTO, pto_data])
 
             # Simulate RPM with PTO-aware logic
             rpm_data = rpm_gen.get_next(pto_engaged)
-            writer.writerow([ts, '0x0CF00400', rpm_data])
+            writer.writerow([ts, CAN_ID_RPM, rpm_data])
 
             # Simulate error/fault code data
             fault_data = fault_gen.maybe_emit_fault()
             if fault_data:
-                writer.writerow([ts, '0x0CFE6CEE', fault_data])
+                writer.writerow([ts, CAN_ID_FAULT, fault_data])
 
             timestamp += timedelta(seconds=1) # Increment timestamp by 1 second
 
