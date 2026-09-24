@@ -1,5 +1,4 @@
 import sqlite3
-import random
 import time
 from datetime import datetime, timezone
 

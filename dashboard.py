@@ -150,7 +150,7 @@ with tab3:
     chart = alt.Chart(fault_freq).mark_bar().encode(
         x=alt.X("wrapped_description:N", sort="-y", title="Fault Description"),
         y=alt.Y("count:Q", title="Count"),
-        color=alt.Color("severity:N", scale=alt.Scale(domain=["Critical", "Warning", "Info"], range=["red", "orange", "green"])),
+        color=alt.Color("severity:N", scale=alt.Scale(domain=SEVERITY_COLORS.keys(), range=list(SEVERITY_COLORS.values()))),
         tooltip=["wrapped_description", "count", "severity"]
     ).properties(
         width="container",
